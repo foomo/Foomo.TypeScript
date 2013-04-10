@@ -1,0 +1,84 @@
+<?php
+
+/*
+ * This file is part of the foomo Opensource Framework.
+ * 
+ * The foomo Opensource Framework is free software: you can redistribute it
+ * and/or modify it under the terms of the GNU Lesser General Public License as
+ * published  by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * The foomo Opensource Framework is distributed in the hope that it will
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * the foomo Opensource Framework. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+namespace Foomo\TypeScript\Frontend;
+
+
+use Foomo\Services\Reflection\ServiceObjectType;
+use Foomo\TypeScript\Services\TypeDefinitionRenderer;
+
+/**
+ * @link www.foomo.org
+ * @license www.gnu.org/licenses/lgpl.txt
+ * @author jan
+ */
+class Controller
+{
+	/**
+	 * my model
+	 *
+	 * @var \Foomo\TypeScript\Frontend\Model
+	 */
+	public $model;
+	private function loadServices()
+	{
+		$services = \Foomo\Services\Utils::getAllLocalServiceDescriptions();
+		// filter out json rpc
+		foreach($services as $module => $serviceDescriptions) {
+			foreach($serviceDescriptions as $serviceDescription) {
+				/* @var $serviceDescription \Foomo\Services\ServiceDescription */
+				if($serviceDescription->type == 'serviceTypeRpcJson') {
+					if(!isset($this->model->services[$module])) {
+						$this->model->services[$module] = array();
+					}
+					$this->model->services[$module][] = $serviceDescription;
+				}
+			}
+		}
+	}
+	public function actionDefault()
+	{
+		$this->loadServices();
+	}
+	public function actionBuildAll()
+	{
+		$this->loadServices();
+		foreach($this->model->services as $module => $serviceDescriptions) {
+			foreach($serviceDescriptions as $serviceDescription) {
+				/* @var $serviceDescription \Foomo\Services\ServiceDescription */
+				$typescriptModuleDir = \Foomo\Config::getModuleDir($module) . DIRECTORY_SEPARATOR . 'typescript';
+				if(is_writable($typescriptModuleDir)) {
+					$tsFile = $typescriptModuleDir . DIRECTORY_SEPARATOR . $serviceDescription->package . '.d.ts';
+					$report = 'wrote type definition for ' . $serviceDescription->name . ' to ' . $tsFile;
+
+					file_put_contents(
+						$tsFile,
+						TypeDefinitionRenderer::render(
+							$serviceDescription->name,
+							new TypeDefinitionRenderer($serviceDescription->package)
+						)
+					);
+				} else {
+					$report = 'no typescript dir or dir not writable in module ' . $module . ' ' . $typescriptModuleDir;
+				}
+				$this->model->buildReport[] = $report;
+			}
+		}
+	}
+}

@@ -47,16 +47,22 @@ class TypeScript
 	 * @var bool
 	 */
 	protected $displayCompilerErrors = false;
+	/**
+	 * where to look for templates on what to use there
+	 * @var array
+	 */
+	protected $templateJobs = array();
 	private function __construct($file)
 	{
 		$this->file = $file;
 	}
+
 	/**
 	 * @return string
 	 */
 	public function getOutputPath()
 	{
-		return TypeScript\Module::getHtdocsVarPath() . DIRECTORY_SEPARATOR . $this->getOutputBasename();
+		return TypeScript\Module::getHtdocsVarPath() . '/' . $this->getOutputBasename();
 	}
 
 	/**
@@ -92,6 +98,21 @@ class TypeScript
 		return  \md5($this->file) . '.js';
 	}
 	/**
+	 * @param string $dir absolute path of directory to look for templates for
+	 *
+	 * @param TypeScript\TemplateRenderer $renderer
+	 *
+	 * @return $this
+	 */
+	public function lookForTemplates($dir, TypeScript\TemplateRenderer $renderer)
+	{
+		$this->templateJobs[] = array(
+			'dir' => $dir,
+			'renderer' => $renderer
+		);
+		return $this;
+	}
+	/**
 	 * @return $this
 	 */
 	public function compile()
@@ -101,9 +122,15 @@ class TypeScript
 		if(file_exists($out)) {
 			$mTime = filemtime($out);
 		}
-		if($mTime < self::getLastChange($this->file)) {
+		if(
+			$mTime < self::getLastChange($this->file) ||
+			$mTime < self::getLastTemplateChange($this->templateJobs)
+		) {
 			unlink($out);
+			self::renderTemplates($this->templateJobs);
+
 			$arguments = array();
+
 			if($this->comments) {
 				$arguments[] = '--comments';
 			}
@@ -129,9 +156,95 @@ class TypeScript
 				Utils::appendToPhpErrorLog($call->report);
 			}
 			self::fixSourceMap($out);
+			file_put_contents(
+				$out,
+				str_replace(
+					'//@ sourceMappingURL=',
+					'//@ sourceMappingURL=' . TypeScript\Module::getHtdocsVarPath() . '/',
+					file_get_contents($out)
+				)
+			);
 		}
 		return $this;
 	}
+
+	/**
+	 * @param array $templateJobs
+	 *
+	 * @return int last change
+	 */
+	public static function getLastTemplateChange(array $templateJobs)
+	{
+		$mTime = 0;
+		foreach($templateJobs as $templateJob) {
+			$dir = $templateJob['dir'];
+			foreach(self::scanForTemplatesInDir($dir) as $templateInfo) {
+				$templateMTime = filemtime($templateInfo->filename);
+				if($templateMTime > $mTime) {
+					$mTime = $templateMTime;
+				}
+			}
+		}
+		return $mTime;
+	}
+
+	public static function renderTemplates(array $templateJobs)
+	{
+		foreach($templateJobs as $templateJob) {
+			$dir = $templateJob['dir'];
+			$renderer = $templateJob['renderer'];
+			$renderer->renderTemplates(self::scanForTemplatesInDir($dir));
+		}
+	}
+	/**
+	 * scan for templates
+	 *
+	 * @param string $dir where to scan in
+	 * @param array $path for recursion leave empty
+	 * @param array $templateInfos for recursion leave empty
+	 *
+	 * @return TypeScript\TemplateRenderer\TemplateInfo[]
+	 */
+	public static function scanForTemplatesInDir($dir, array &$path = array(), array &$templateInfos = array())
+	{
+		$iterator = new \DirectoryIterator($dir);
+		foreach($iterator as $fileInfo) {
+			$name = $fileInfo->getFilename();
+			/* @var $fileInfo \SplFileInfo */
+			if(substr($name, 0, 1) == '.') {
+				// skip hidden files
+				continue;
+			}
+			if($fileInfo->isDir()) {
+				$path .= DIRECTORY_SEPARATOR . $name;
+				self::scanForTemplatesInDir(
+					$fileInfo->getPathname(),
+					$path,
+					$templateInfos
+				);
+			} else if(substr($name, -5) == '.html') {
+				$info = new TypeScript\TemplateRenderer\TemplateInfo();
+				$info->name = substr($name, 0, -5);
+				$info->path = $path;
+				$info->relativeFilename = implode(
+					DIRECTORY_SEPARATOR,
+					array_merge(
+						$path, array($name))
+					)
+					. '.html'
+				;
+				$info->filename = $fileInfo->getPathname();
+				$templateInfos[] = $info;
+			}
+		}
+		return $templateInfos;
+	}
+
+	/**
+	 * fixes the generated source map, so that it references the source server
+	 *
+	 * @param string $out tsc outfile
+	 */
 	private static function fixSourcemap($out)
 	{
 		$mapFile = $out . '.map';
@@ -143,7 +256,6 @@ class TypeScript
 		$map->sources = $newSources;
 		file_put_contents($mapFile, json_encode($map));
 	}
-
 	/**
 	 * latest change in file and it refernces
 	 *
