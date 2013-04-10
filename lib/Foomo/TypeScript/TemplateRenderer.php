@@ -33,7 +33,7 @@ class TemplateRenderer
 
 	/**
 	 * @param string $targetFile where to write the generated code to
-	 * @param string $templateFile which template to use
+	 * @param string $templateFile which template to use for the template generation
 	 * @param mixed $templateModel whatever shall be passed as a generale model into the template
 	 */
 	public function __construct($targetFile, $templateFile, $templateModel)

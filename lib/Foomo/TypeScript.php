@@ -268,9 +268,11 @@ class TypeScript
 		$deps = self::resolveDependencies($file);
 		$mTime = 0;
 		foreach($deps as $dep) {
-			$depMTime = filemtime($dep);
-			if($depMTime > $mTime) {
-				$mTime = $depMTime;
+			if(file_exists($dep)) {
+				$depMTime = filemtime($dep);
+				if($depMTime > $mTime) {
+					$mTime = $depMTime;
+				}
 			}
 		}
 		return $mTime;
