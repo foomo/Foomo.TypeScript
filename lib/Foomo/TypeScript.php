@@ -19,6 +19,7 @@
 
 namespace Foomo;
 
+use Foomo\TypeScript\ErrorRenderer;
 use Foomo\Utils;
 
 /**
@@ -147,8 +148,7 @@ class TypeScript
 					unlink($out);
 				}
 				if($this->displayCompilerErrors) {
-					header('Content-Type: text/plain;charset=utf-8;');
-					echo $call->stdErr;
+					ErrorRenderer::renderError($call);
 					exit;
 				}
 				trigger_error('tsc threw up ' . $call->report, E_USER_ERROR);

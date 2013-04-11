@@ -1,0 +1,35 @@
+body {
+    font-family: "Courier New", monospace;
+    margin: 20px;
+}
+
+.cmd {
+    font-weight: bold;
+    font-size: 0.8em;
+}
+
+li.errorItem {
+    list-style: none;
+    border: 1px grey solid;
+    margin: 20px;
+}
+
+.file {
+    font-size: 0.8em;
+}
+.position {
+    color: black;
+    font-weight: bold;
+}
+.error {
+    color:darkred;
+    font-weight: bold;
+}
+
+div {
+    margin: 5px;
+    padding:5px;
+}
+ .snippet {
+     background-color: #d3d3d3;
+ }
