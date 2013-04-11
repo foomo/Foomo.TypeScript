@@ -1,7 +1,10 @@
 <?
 	/* @var $model \Foomo\TypeScript\Services\TypeDefinitionRenderer */
 ?>
-module <?= $model->module ?> {
+declare module <?= $model->module ?> {
+	class Operation {
+		public pending: bool;
+	}
 <?
 foreach($model->operations as $op):
 	/* @var $op \Foomo\Services\Reflection\ServiceOperation */
@@ -10,14 +13,20 @@ foreach($model->operations as $op):
 	} else {
 		$returnType = new \Foomo\Services\Reflection\ServiceObjectType('null');
 	}
-
+	$opName  = 'Operation' . ucfirst($op->name);
 ?>
-	export class Operation<?= ucfirst($op->name) ?> {
-		execute(successHandler:(op: <?= $model->renderInlineType($returnType, 2) ?>) => undefined );
-		error();
+	export class <?= $opName ?> extends Operation {
+		public data: {
+			exception: any;
+			arguments: any[];
+			messages: any[];
+			result: <?= $model->renderInlineType($returnType, 3) ?>;
+		};
+		execute(successHandler:(op: <?= $opName ?>) => undefined );
+		error(errorHandler:(op: <?= $opName ?>) => undefined);
 	}
 <? endforeach; ?>
-	export var operations = {
+	declare var operations : {
 <?
 	$i = 0;
 	foreach($model->operations as $op):
@@ -28,7 +37,7 @@ foreach($model->operations as $op):
 		}
 
 ?>
-		<?= $op->name ?>: (<?= implode(', ', $parms) ?>) => Operation<?= ucfirst($op->name) . (++$i < count($model->operations)?',':'')?>
+		<?= $op->name ?>: (<?= implode(', ', $parms) ?>) => Operation<?= ucfirst($op->name) . (++$i < count($model->operations)?';':';')?>
 
 <? endforeach; ?>
 	}
