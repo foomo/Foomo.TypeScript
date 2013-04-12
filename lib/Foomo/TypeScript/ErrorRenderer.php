@@ -36,10 +36,11 @@ class ErrorRenderer
 		$doc->addStylesheets(array(
 			Module::getHtdocsPath('css/errorRenderer.css')
 		));
+		$doc->setTitle('tsc did not like what you gave it to ...');
 		$doc->addBody(
 			'<h1>TypeScript compiler errors</h1>' .
 			'<div class="cmd">' . htmlspecialchars($call->renderCommand()) . '</div>' .
-			'<div class="error"><code>' . htmlspecialchars($call->stdErr) . '</code></div>' .
+			'<div class="error"><code>' . implode('<br>', explode(PHP_EOL, htmlspecialchars($call->stdErr))) . '</code></div>' .
 			'<ul>'
 		);
 		$plainErrors = array();

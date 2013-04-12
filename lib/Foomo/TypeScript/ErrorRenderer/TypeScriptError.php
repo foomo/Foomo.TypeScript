@@ -76,7 +76,7 @@ class TypeScriptError
 				$geshi->start_line_numbers_at($firstLine);
 				return $geshi->parse_code();
 			} else {
-				return highlight_string($src);
+				return $src;
 			}
 		}
 
