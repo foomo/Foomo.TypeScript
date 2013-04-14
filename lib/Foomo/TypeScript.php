@@ -48,6 +48,12 @@ class TypeScript
 	 * @var bool
 	 */
 	protected $displayCompilerErrors = false;
+	const TARGET_ES3 = 'ES3';
+	const TARGET_ES5 = 'ES5';
+	/**
+	 * @var string
+	 */
+	protected $target = 'ES3';
 	/**
 	 * where to look for templates on what to use there
 	 * @var array
@@ -113,6 +119,16 @@ class TypeScript
 		);
 		return $this;
 	}
+
+	/**
+	 * @param string $ecmaScriptVersion
+	 * @return $this
+	 */
+	public function target($ecmaScriptVersion)
+	{
+		$this->target = $ecmaScriptVersion;
+		return $this;
+	}
 	/**
 	 * @return $this
 	 */
@@ -130,7 +146,7 @@ class TypeScript
 			unlink($out);
 			self::renderTemplates($this->templateJobs);
 
-			$arguments = array();
+			$arguments = array('--target', $this->target);
 
 			if($this->comments) {
 				$arguments[] = '--comments';
