@@ -20,7 +20,7 @@ if(true || !empty($type->phpDocEntry->comment)):
 	echo Rosetta::getJSDocComment($type, 1);
 ?>
 <? endif; ?>
-	export class Vo<?= basename(str_replace('\\', DIRECTORY_SEPARATOR, $type->type)) ?> {
+	export class <?= end(explode('.', Rosetta::getInterfaceName($type))) ?> {
 <?
 foreach($type->constants as $name => $value):
 	$constantType = 'any';
