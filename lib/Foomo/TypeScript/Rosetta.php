@@ -55,7 +55,7 @@ class Rosetta
 		if($type) {
 			if(class_exists($type->type)) {
 				$ns = self::getIntefaceModule($type);
-				return  $ns . (!empty($ns)?'.':'') . 'I' .end(explode('\\', $type->type));
+				return  $ns . (!empty($ns)?'.':'') . 'Vo' .end(explode('\\', $type->type));
 			} else {
 				switch($type->type) {
 					case 'mixed':
@@ -75,11 +75,24 @@ class Rosetta
 					case 'null':
 						return 'undefined';;
 					default:
-						return 'wtf';
+						return 'wtf - ' . $type->type;
 				}
 			}
 		} else {
 			return 'undefined';
+		}
+	}
+	public static function getJSDocComment(ServiceObjectType $type, $level = 0)
+	{
+		if(!empty($type->phpDocEntry->comment)) {
+			$whitespace = str_repeat(chr(9), $level);
+			$lines = $whitespace . '/**' . PHP_EOL;
+			foreach(explode(PHP_EOL, $type->phpDocEntry->comment) as $line) {
+				$lines .= $whitespace . ' * ' . $line . PHP_EOL;
+			}
+			// $lines .= $whitespace . json_encode($type->phpDocEntry, JSON_PRETTY_PRINT) . PHP_EOL;
+			$lines .= $whitespace . ' */' . PHP_EOL;
+			return $lines;
 		}
 	}
 }

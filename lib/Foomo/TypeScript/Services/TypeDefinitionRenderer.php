@@ -89,7 +89,7 @@ class TypeDefinitionRenderer extends AbstractRenderer
 	 */
 	public function renderType(ServiceObjectType $type)
 	{
-		$this->types[] = $type;
+		$this->types[$type->type] = $type;
 	}
 	public function renderInlineType(ServiceObjectType $type, $level = 0)
 	{
