@@ -22,6 +22,7 @@ namespace Foomo\TypeScript\Frontend;
 
 use Foomo\Services\Reflection\ServiceObjectType;
 use Foomo\TypeScript\Services\TypeDefinitionRenderer;
+use Foomo\TypeScript\VoModuleMapper;
 
 /**
  * @link www.foomo.org
@@ -96,7 +97,10 @@ class Controller
 					\Foomo\TypeScript\Module::getView(
 						'Foomo\\TypeScript\\Services\\Hack',
 						'serviceValueObjects',
-						(object) array('types' => $types))
+						(object) array(
+							'types' => $types,
+							'maps' => VoModuleMapper::getMaps($types)
+						))
 				);
 			}
 		}
