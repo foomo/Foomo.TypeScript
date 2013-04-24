@@ -20,6 +20,7 @@
 namespace Foomo\TypeScript;
 
 use Foomo\CliCall;
+use Foomo\MVC;
 use Foomo\TypeScript\ErrorRenderer\TypeScriptError;
 use Foomo\View;
 
@@ -31,6 +32,7 @@ class ErrorRenderer
 {
 	public static function renderError(CliCall $call)
 	{
+		MVC::abort();
 		ob_end_clean();
 		$doc = new \Foomo\HTMLDocument();
 		$doc->addStylesheets(array(
