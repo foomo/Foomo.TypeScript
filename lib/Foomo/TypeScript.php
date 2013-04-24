@@ -54,6 +54,7 @@ class TypeScript
 	 * @var string
 	 */
 	protected $target = 'ES3';
+	protected $outputFilters = array();
 	/**
 	 * where to look for templates on what to use there
 	 * @var array
@@ -71,7 +72,11 @@ class TypeScript
 	{
 		return TypeScript\Module::getHtdocsVarPath() . '/' . $this->getOutputBasename();
 	}
-
+	public function addOutputFilter(callable $filter)
+	{
+		$this->outputFilters[] = $filter;
+		return $this;
+	}
 	/**
 	 *
 	 * @param bool $display
@@ -170,6 +175,14 @@ class TypeScript
 				trigger_error('tsc threw up ' . $call->report, E_USER_ERROR);
 			} else {
 				Utils::appendToPhpErrorLog($call->report);
+			}
+			// run filters
+			if(count($this->outputFilters) > 0) {
+				$js = file_get_contents($out);
+				foreach($this->outputFilters as $filter) {
+					$js = $filter($js);
+				}
+				file_put_contents($out, $js);
 			}
 			self::fixSourceMap($out);
 			file_put_contents(
