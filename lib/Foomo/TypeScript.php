@@ -60,6 +60,10 @@ class TypeScript
 	 * @var array
 	 */
 	protected $templateJobs = array();
+	/**
+	 * @var bool
+	 */
+	protected $watch = true;
 	private function __construct($file)
 	{
 		$this->file = $file;
@@ -86,6 +90,19 @@ class TypeScript
 	public function displayCompilerErrors($display = true)
 	{
 		$this->displayCompilerErrors = $display;
+		return $this;
+	}
+
+	/**
+	 * watch for changes
+	 *
+	 * @param bool $watch
+	 *
+	 * @return $this
+	 */
+	public function watch($watch = true)
+	{
+		$this->watch = $watch;
 		return $this;
 	}
 	/**
@@ -140,59 +157,63 @@ class TypeScript
 	public function compile()
 	{
 		$out = $this->getOutputFilename();
-		$mTime = 0;
-		if(file_exists($out)) {
-			$mTime = filemtime($out);
-		}
-		if(
-			$mTime < self::getLastChange($this->file) ||
-			$mTime < self::getLastTemplateChange($this->templateJobs)
-		) {
-			unlink($out);
-			self::renderTemplates($this->templateJobs);
-
-			$arguments = array('--target', $this->target);
-
-			if($this->comments) {
-				$arguments[] = '--comments';
+		if($this->watch || !file_exists($out)) {
+			$mTime = 0;
+			if(file_exists($out)) {
+				$mTime = filemtime($out);
 			}
-			if($this->sourceMap) {
-				$arguments[] = '--sourcemap';
-			}
-			$arguments[] = '--out';
-			$arguments[] = $out;
-			$arguments[] = $this->file;
-			$call = CliCall::create('tsc', $arguments);
-			$call->execute();
-			if($call->exitStatus !== 0) {
+			if(
+				$mTime < self::getLastChange($this->file) ||
+				$mTime < self::getLastTemplateChange($this->templateJobs)
+			) {
 				if(file_exists($out)) {
 					unlink($out);
 				}
-				if($this->displayCompilerErrors) {
-					ErrorRenderer::renderError($call);
-					exit;
+				self::renderTemplates($this->templateJobs);
+
+				$arguments = array('--target', $this->target);
+
+				if($this->comments) {
+					$arguments[] = '--comments';
 				}
-				trigger_error('tsc threw up ' . $call->report, E_USER_ERROR);
-			} else {
-				Utils::appendToPhpErrorLog($call->report);
-			}
-			// run filters
-			if(count($this->outputFilters) > 0) {
-				$js = file_get_contents($out);
-				foreach($this->outputFilters as $filter) {
-					$js = $filter($js);
+				if($this->sourceMap) {
+					$arguments[] = '--sourcemap';
 				}
-				file_put_contents($out, $js);
+				$arguments[] = '--out';
+				$arguments[] = $out;
+				$arguments[] = $this->file;
+				$call = CliCall::create('tsc', $arguments);
+				$call->execute();
+				if($call->exitStatus !== 0) {
+					if(file_exists($out)) {
+						unlink($out);
+					}
+					if($this->displayCompilerErrors) {
+						ErrorRenderer::renderError($call);
+						exit;
+					}
+					trigger_error('tsc threw up ' . $call->report, E_USER_ERROR);
+				} else {
+					Utils::appendToPhpErrorLog($call->report);
+				}
+				// run filters
+				if(count($this->outputFilters) > 0) {
+					$js = file_get_contents($out);
+					foreach($this->outputFilters as $filter) {
+						$js = $filter($js);
+					}
+					file_put_contents($out, $js);
+				}
+				self::fixSourceMap($out);
+				file_put_contents(
+					$out,
+					str_replace(
+						'//@ sourceMappingURL=',
+						'//@ sourceMappingURL=' . TypeScript\Module::getHtdocsVarPath() . '/',
+						file_get_contents($out)
+					)
+				);
 			}
-			self::fixSourceMap($out);
-			file_put_contents(
-				$out,
-				str_replace(
-					'//@ sourceMappingURL=',
-					'//@ sourceMappingURL=' . TypeScript\Module::getHtdocsVarPath() . '/',
-					file_get_contents($out)
-				)
-			);
 		}
 		return $this;
 	}
@@ -352,12 +373,41 @@ class TypeScript
 		return $deps;
 	}
 	/**
-	 * @param string $file .ts main source file as an absoulte path
+	 * @param string $file .ts main source file as an absolute path
 	 *
 	 * @return TypeScript
 	 */
 	public static function create($file)
 	{
 		return new self($file);
+	}
+
+	/**
+	 * to make your project "build" process more efficient you can use templates for your
+	 * .ts file, that will be interpreted as php templates and basically serve as a
+	 * primitive preprocessor on that file - please, that we are not running through
+	 * your referenced files
+	 *
+	 * be aware, that the passed in data are not being watched !!!
+	 * in case of doubt - change the output filename or touch the template
+	 *
+	 * be also aware, that the generated files should be ignored by your VCS
+	 * (.names might be a good idea)
+	 *
+	 * @param $template template file to generate ts from
+	 * @param string $name filename may include a relative path from the templates directory
+	 * @param array $data array of data that will be extracted into the template
+	 *
+	 * @return TypeScript
+	 */
+	public static function createDynamic($template, $name, array $data)
+	{
+		$dir = dirname($template);
+		$file = $dir . DIRECTORY_SEPARATOR . $name . ((substr($name, -3) == '.ts')?'':'.ts');
+		if(!file_exists($file) || filemtime($file) < filemtime($template)) {
+			$view = View::fromFile($template);
+			file_put_contents($file, $view->render($data));
+		}
+		return self::create($file);
 	}
 }
