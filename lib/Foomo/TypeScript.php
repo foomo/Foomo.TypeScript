@@ -76,7 +76,7 @@ class TypeScript
 	{
 		return TypeScript\Module::getHtdocsVarPath() . '/' . $this->getOutputBasename();
 	}
-	public function addOutputFilter(callable $filter)
+	public function addOutputFilter($filter)
 	{
 		$this->outputFilters[] = $filter;
 		return $this;
