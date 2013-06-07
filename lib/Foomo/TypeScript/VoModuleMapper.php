@@ -29,7 +29,10 @@ use Foomo\TypeScript\VoModuleMapper\ModuleVoMap;
 class VoModuleMapper
 {
 	/**
+	 * get a nested module vo map
+	 *
 	 * @param ServiceObjectType[] $types
+	 *
 	 * @return ModuleVoMap[]
 	 */
 	public static function getMaps(array $types)
@@ -42,6 +45,17 @@ class VoModuleMapper
 				$namespaces[$type->namespace] = array();
 			}
 			$namespaces[$type->namespace][] = $type;
+		}
+
+		// pad empty namespaces
+		foreach(array_keys($namespaces) as $namespace) {
+			$missingNamespace = '';
+			foreach(explode('\\', $namespace) as $namespacePart) {
+				$missingNamespace .= (!empty($missingNamespace)?'\\':'') . $namespacePart;
+				if(!isset($namespaces[$missingNamespace])) {
+					$namespaces[$missingNamespace] = array();
+				}
+			}
 		}
 
 		// find top level namespaces
@@ -64,6 +78,7 @@ class VoModuleMapper
 			}
 		}
 
+		//return $maps;
 		// sort out the top level ones
 		$topLevelMaps = array();
 		foreach($maps as $rootNamespace => $rootNamespaceMaps) {
@@ -73,6 +88,7 @@ class VoModuleMapper
 				}
 			}
 		}
+
 		return $topLevelMaps;
 	}
 	private static function getRootNamespace($namespace, array $namespaces)
@@ -80,8 +96,7 @@ class VoModuleMapper
 		$rootNamespace = $namespace;
 		foreach($namespaces as $rootNamespaceCandidate) {
 			if(
-				self::namespaceIsInNamespace($rootNamespace, $rootNamespaceCandidate) &&
-				strlen($rootNamespaceCandidate) < strlen($rootNamespace)
+				self::namespaceIsInNamespace($rootNamespace, $rootNamespaceCandidate)
 			) {
 				$rootNamespace = $rootNamespaceCandidate;
 			}
@@ -104,8 +119,8 @@ class VoModuleMapper
 	private static function namespaceIsInNamespace($namespace, $topLevelNamespace)
 	{
 		return
-			strlen($topLevelNamespace) < strlen($namespace) &&
-			strpos($namespace, $topLevelNamespace) === 0
+			strpos($namespace, $topLevelNamespace) === 0 &&
+			strlen($topLevelNamespace) < strlen($namespace)
 		;
 	}
 }
