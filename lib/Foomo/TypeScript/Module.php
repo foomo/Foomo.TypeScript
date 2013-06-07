@@ -65,6 +65,7 @@ class Module extends \Foomo\Modules\ModuleBase
 	{
 		return array(
 			\Foomo\Modules\Resource\Module::getResource('Foomo', self::VERSION),
+			\Foomo\Modules\Resource\Module::getResource('Foomo.Services', self::VERSION),
 			\Foomo\Modules\Resource\CliCommand::getResource('tsc')
 		);
 	}
