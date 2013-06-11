@@ -25,7 +25,7 @@ foreach($model->operations as $op):
 			exception: any;
 			arguments: any[];
 			messages: any[];
-			result: <?= Rosetta::getInterfaceName($returnType) ?>;
+			result: <?= Rosetta::getInterfaceName($returnType) ?><?= $returnType->isArrayOf?'[]':'' ?>;
 		};
 		execute(successHandler:(op: <?= $opName ?>) => undefined );
 		error(errorHandler:(op: <?= $opName ?>) => undefined);
