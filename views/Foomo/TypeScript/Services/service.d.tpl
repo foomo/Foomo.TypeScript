@@ -31,7 +31,7 @@ foreach($model->operations as $op):
 		error(errorHandler:(op: <?= $opName ?>) => undefined);
 	}
 <? endforeach; ?>
-	declare var operations : {
+	var operations : {
 <?
 	$i = 0;
 	foreach($model->operations as $op):
