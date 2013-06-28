@@ -92,8 +92,10 @@ class Controller
 		}
 		foreach($moduleTypes as $module => $types) {
 			if(!empty($types)) {
-				file_put_contents(
-					$typescriptDirs[$module] . DIRECTORY_SEPARATOR . 'serviceValueObjects.ts',
+				$voDefsFilename = $typescriptDirs[$module] . DIRECTORY_SEPARATOR . 'serviceValueObjects.ts';
+
+				$bytesWritten = file_put_contents(
+					$voDefsFilename,
 					\Foomo\TypeScript\Module::getView(
 						'Foomo\\TypeScript\\Services\\Hack',
 						'serviceValueObjects',
@@ -102,6 +104,7 @@ class Controller
 							'maps' => VoModuleMapper::getMaps($types)
 						))
 				);
+				$this->model->buildReport[] = 'wrote ' . $bytesWritten .' to ' . $voDefsFilename;
 			}
 		}
 	}
