@@ -18,6 +18,7 @@
  */
 
 namespace Foomo\TypeScript;
+use Foomo\Modules\MakeResult;
 
 /**
  * @link www.foomo.org
@@ -69,4 +70,25 @@ class Module extends \Foomo\Modules\ModuleBase
 			\Foomo\Modules\Resource\CliCommand::getResource('tsc')
 		);
 	}
+
+	public static function make($target, MakeResult $result)
+	{
+		switch($target) {
+			case 'all':
+				foreach(Utils::buildAll() as $line) {
+					$result->addEntry($line);
+				}
+				break;
+			case 'clean':
+				foreach(Utils::cleanAll() as $line) {
+					$result->addEntry($line);
+				}
+				break;
+			default:
+				$result->addEntry('nothing to make here for target ' . $target);
+		}
+	}
+
+
+
 }

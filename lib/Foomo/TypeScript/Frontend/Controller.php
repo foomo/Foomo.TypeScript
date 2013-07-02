@@ -21,8 +21,8 @@ namespace Foomo\TypeScript\Frontend;
 
 
 use Foomo\Services\Reflection\ServiceObjectType;
-use Foomo\TypeScript\Services\TypeDefinitionRenderer;
 use Foomo\TypeScript\VoModuleMapper;
+use Foomo\TypeScript\Utils;
 
 /**
  * @link www.foomo.org
@@ -39,19 +39,7 @@ class Controller
 	public $model;
 	private function loadServices()
 	{
-		$services = \Foomo\Services\Utils::getAllLocalServiceDescriptions();
-		// filter out json rpc
-		foreach($services as $module => $serviceDescriptions) {
-			foreach($serviceDescriptions as $serviceDescription) {
-				/* @var $serviceDescription \Foomo\Services\ServiceDescription */
-				if($serviceDescription->type == 'serviceTypeRpcJson') {
-					if(!isset($this->model->services[$module])) {
-						$this->model->services[$module] = array();
-					}
-					$this->model->services[$module][] = $serviceDescription;
-				}
-			}
-		}
+		$this->model->services = Utils::getAllServices();
 	}
 	public function actionDefault()
 	{
@@ -60,49 +48,6 @@ class Controller
 	public function actionBuildAll()
 	{
 		$this->loadServices();
-		$moduleTypes = array();
-		$typescriptDirs = array();
-		foreach($this->model->services as $module => $serviceDescriptions) {
-			$moduleTypes[$module] = array();
-			foreach($serviceDescriptions as $serviceDescription) {
-				/* @var $serviceDescription \Foomo\Services\ServiceDescription */
-				$typescriptModuleDir = \Foomo\Config::getModuleDir($module) . DIRECTORY_SEPARATOR . 'typescript';
-				$typescriptDirs[$module] = $typescriptModuleDir;
-				if(is_writable($typescriptModuleDir)) {
-					$tsFile = $typescriptModuleDir . DIRECTORY_SEPARATOR . $serviceDescription->package . '.d.ts';
-					$report = 'wrote type definition for ' . $serviceDescription->name . ' to ' . $tsFile;
-					$renderer = new TypeDefinitionRenderer($serviceDescription->package);
-					file_put_contents(
-						$tsFile,
-						TypeDefinitionRenderer::render(
-							$serviceDescription->name,
-							$renderer
-						)
-					);
-					foreach($renderer->types as $name => $type) {
-						if(class_exists($name)) {
-							$moduleTypes[$module][$name] = $type;
-						}
-					}
-				} else {
-					$report = 'no typescript dir or dir not writable in module ' . $module . ' ' . $typescriptModuleDir;
-				}
-				$this->model->buildReport[] = $report;
-			}
-		}
-		foreach($moduleTypes as $module => $types) {
-			if(!empty($types)) {
-				file_put_contents(
-					$typescriptDirs[$module] . DIRECTORY_SEPARATOR . 'serviceValueObjects.ts',
-					\Foomo\TypeScript\Module::getView(
-						'Foomo\\TypeScript\\Services\\Hack',
-						'serviceValueObjects',
-						(object) array(
-							'types' => $types,
-							'maps' => VoModuleMapper::getMaps($types)
-						))
-				);
-			}
-		}
+		$this->model->buildReport = Utils::buildAll();
 	}
 }
