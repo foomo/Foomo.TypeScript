@@ -65,7 +65,8 @@ class Utils
 		}
 		foreach($moduleTypes as $module => $types) {
 			if(!empty($types)) {
-				file_put_contents(
+				$voDefsFilename = $typescriptDirs[$module] . DIRECTORY_SEPARATOR . 'serviceValueObjects.ts';
+				$bytesWritten = file_put_contents(
 					$typescriptDirs[$module] . DIRECTORY_SEPARATOR . 'serviceValueObjects.ts',
 					\Foomo\TypeScript\Module::getView(
 						'Foomo\\TypeScript\\Services\\Hack',
@@ -75,6 +76,7 @@ class Utils
 							'maps' => VoModuleMapper::getMaps($types)
 						))
 				);
+				$buildReport[] = 'wrote ' . $bytesWritten .' to ' . $voDefsFilename;
 			}
 		}
 		return $buildReport;
@@ -90,14 +92,15 @@ class Utils
 				/* @var $serviceDescription \Foomo\Services\ServiceDescription */
 				$typescriptModuleDir = \Foomo\Config::getModuleDir($module) . DIRECTORY_SEPARATOR . 'typescript';
 				$typescriptDirs[$module] = $typescriptModuleDir;
-				if(is_writable($typescriptModuleDir)) {
-					$tsFile = $typescriptModuleDir . DIRECTORY_SEPARATOR . $serviceDescription->package . '.d.ts';
+				$tsFile = $typescriptModuleDir . DIRECTORY_SEPARATOR . $serviceDescription->package . '.d.ts';
+				if(file_exists($tsFile)) {
 					$buildReport[] = 'removing service definition for ' . $serviceDescription->name . ' to ' . $tsFile;
-					$renderer = new TypeDefinitionRenderer($serviceDescription->package);
-					foreach($renderer->types as $name => $type) {
-						if(class_exists($name)) {
-							$moduleTypes[$module][$name] = $type;
-						}
+					unlink($tsFile);
+				}
+				$renderer = new TypeDefinitionRenderer($serviceDescription->package);
+				foreach($renderer->types as $name => $type) {
+					if(class_exists($name)) {
+						$moduleTypes[$module][$name] = $type;
 					}
 				}
 			}
@@ -106,6 +109,7 @@ class Utils
 			$serviceTypeDefinitionsFile = $typescriptDirs[$module] . DIRECTORY_SEPARATOR . 'serviceValueObjects.ts';
 			if(file_exists($serviceTypeDefinitionsFile)) {
 				$buildReport[] = 'removing ' . $serviceTypeDefinitionsFile;
+				unlink($serviceTypeDefinitionsFile);
 			}
 		}
 		return $buildReport;

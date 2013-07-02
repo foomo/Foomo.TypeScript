@@ -119,7 +119,7 @@ class VoModuleMapper
 	private static function namespaceIsInNamespace($namespace, $topLevelNamespace)
 	{
 		return
-			strpos($namespace, $topLevelNamespace) === 0 &&
+			strpos($namespace . '.', $topLevelNamespace . '.') === 0 &&
 			strlen($topLevelNamespace) < strlen($namespace)
 		;
 	}
