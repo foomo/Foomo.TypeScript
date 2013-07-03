@@ -45,14 +45,17 @@ class TemplateRenderer
 	public function renderTemplates(array $templates)
 	{
 		$template = new Template('template', $this->templateFile);
-		file_put_contents(
-			$this->targetFile,
-			$template->render(
-				$this->templateModel, null, null,
-				array(
-					'templates' => $templates
-				)
+		$templateString = $template->render(
+			$this->templateModel, null, null,
+			array(
+				'templates' => $templates
 			)
 		);
+ 		if($templateString != file_get_contents($this->targetFile)) {
+			file_put_contents(
+				$this->targetFile,
+				$templateString
+			);
+		}
 	}
 }
