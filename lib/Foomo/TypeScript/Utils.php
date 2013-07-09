@@ -112,6 +112,19 @@ class Utils
 				unlink($serviceTypeDefinitionsFile);
 			}
 		}
+		foreach(new \DirectoryIterator(Module::getHtdocsVarDir()) as $fileInfo) {
+			$name = $fileInfo->getFilename();
+			if($fileInfo->isFile() && substr($name, 0, 1) != '.') {
+				if(substr($name, -3) == '.js' || substr($name, -7) == '.js.map') {
+					if(unlink($fileInfo->getPathname())) {
+						$buildReport[] = 'removed compiled file ' . $fileInfo->getFilename();
+					} else {
+						$buildReport[] = 'failed to remove compiled file ' . $fileInfo->getFilename();
+					}
+
+				}
+			}
+		}
 		return $buildReport;
 	}
 	public static function getAllServices()
