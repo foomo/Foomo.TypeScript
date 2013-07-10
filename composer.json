@@ -1,0 +1,14 @@
+{
+    "name": "foomo\/typescript",
+    "type": "foomo-module",
+    "require": {
+        "foomo\/foomo": "0.3.0",
+        "foomo\/services": "0.3.0"
+    },
+    "license": "LGPL-3.0+",
+    "description": "typescript integration",
+    "extra": {
+        "moduleName": "Foomo.TypeScript"
+    },
+    "target-dir": "Foomo.TypeScript"
+}

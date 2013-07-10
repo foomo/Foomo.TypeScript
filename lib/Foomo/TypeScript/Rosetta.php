@@ -55,7 +55,12 @@ class Rosetta
 		if($type) {
 			if(class_exists($type->type)) {
 				$ns = self::getIntefaceModule($type);
-				return  $ns . (!empty($ns)?'.':'') . end(explode('\\', $type->type)) . 'Vo';
+				$parts = explode('\\', $type->type);
+				return
+					$ns .
+					(!empty($ns)?'.':'') .
+					end($parts) . 'Vo'
+				;
 			} else {
 				switch($type->type) {
 					case 'mixed':
