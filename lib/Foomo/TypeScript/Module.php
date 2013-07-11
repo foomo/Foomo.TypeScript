@@ -26,6 +26,7 @@ use Foomo\Modules\MakeResult;
  */
 class Module extends \Foomo\Modules\ModuleBase
 {
+	const VERSION = '0.1.0';
 	//---------------------------------------------------------------------------------------------
 	// ~ Constants
 	//---------------------------------------------------------------------------------------------
@@ -65,8 +66,7 @@ class Module extends \Foomo\Modules\ModuleBase
 	public static function getResources()
 	{
 		return array(
-			\Foomo\Modules\Resource\Module::getResource('Foomo', self::VERSION),
-			\Foomo\Modules\Resource\Module::getResource('Foomo.Services', self::VERSION),
+			\Foomo\Modules\Resource\Module::getResource('Foomo.Services', '0.3.*'),
 			\Foomo\Modules\Resource\CliCommand::getResource('tsc')
 		);
 	}
