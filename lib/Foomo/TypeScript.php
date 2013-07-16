@@ -284,9 +284,11 @@ class TypeScript
 					. '.html'
 				;
 				$info->filename = $fileInfo->getPathname();
-				$templateInfos[] = $info;
+				$templateInfos[$info->name] = $info;
 			}
 		}
+		ksort($templateInfos);
+		$templateInfos = array_values($templateInfos);
 		return $templateInfos;
 	}
 
