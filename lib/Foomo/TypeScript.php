@@ -21,6 +21,7 @@ namespace Foomo;
 
 use Foomo\TypeScript\ErrorRenderer;
 use Foomo\Utils;
+use Foomo\Modules\Resource\Fs as FsResource;
 
 /**
  * @link www.foomo.org
@@ -406,10 +407,27 @@ class TypeScript
 	{
 		$dir = dirname($template);
 		$file = $dir . DIRECTORY_SEPARATOR . $name . ((substr($name, -3) == '.ts')?'':'.ts');
-		if(!file_exists($file) || filemtime($file) < filemtime($template)) {
+		$dir = dirname($file);
+		self::makeSureBuildPathExists($dir);
+		if(!file_exists($file) || filemtime($file) < filemtime($template) ) {
 			$view = View::fromFile($template);
-			file_put_contents($file, $view->render($data));
+			if(file_exists($file)) {
+				$oldContents = file_get_contents($file);
+			} else {
+				$oldContents = null;
+			}
+			$newContents = $view->render($data);
+			if($oldContents != $newContents) {
+				file_put_contents($file, $newContents);
+			}
 		}
 		return self::create($file);
+	}
+	private static function makeSureBuildPathExists($dir)
+	{
+		$resource = FsResource::getAbsoluteResource(FsResource::TYPE_FOLDER, $dir);
+		if(!$resource->resourceValid()) {
+			$resource->tryCreate();
+		}
 	}
 }
