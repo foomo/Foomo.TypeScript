@@ -22,6 +22,7 @@ namespace Foomo;
 use Foomo\TypeScript\ErrorRenderer;
 use Foomo\Utils;
 use Foomo\Modules\Resource\Fs as FsResource;
+use Foomo\Lock;
 
 /**
  * @link www.foomo.org
@@ -125,7 +126,7 @@ class TypeScript
 	 */
 	public function getOutputBasename()
 	{
-		return  \md5($this->file) . '.js';
+		return  md5($this->file) . '.js';
 	}
 	/**
 	 * @param string $dir absolute path of directory to look for templates for
@@ -152,6 +153,23 @@ class TypeScript
 		$this->target = $ecmaScriptVersion;
 		return $this;
 	}
+	private function needsRecompilation($out)
+	{
+		static $iRanBefore;
+		if(is_null($iRanBefore)) {
+			$iRanBefore = true;
+		} else {
+			clearstatcache();
+		}
+		$mTime = 0;
+		if(file_exists($out)) {
+			$mTime = filemtime($out);
+		}
+		return
+			$mTime < self::getLastChange($this->file) ||
+			$mTime < self::getLastTemplateChange($this->templateJobs)
+		;
+	}
 	/**
 	 * @return $this
 	 */
@@ -159,13 +177,16 @@ class TypeScript
 	{
 		$out = $this->getOutputFilename();
 		if($this->watch || !file_exists($out)) {
-			$mTime = 0;
-			if(file_exists($out)) {
-				$mTime = filemtime($out);
-			}
+			$lockName = 'tsLock-' . basename($out);
 			if(
-				$mTime < self::getLastChange($this->file) ||
-				$mTime < self::getLastTemplateChange($this->templateJobs)
+				// have there been any changes ?
+				$this->needsRecompilation($out) &&
+
+				// ok i need to compile - let´s lock this
+				Lock::lock($lockName, true) &&
+
+				// did anybody else do my job?
+				$this->needsRecompilation($out)
 			) {
 				if(file_exists($out)) {
 					unlink($out);
@@ -214,6 +235,7 @@ class TypeScript
 						file_get_contents($out)
 					)
 				);
+				Lock::release($lockName);
 			}
 		}
 		return $this;
