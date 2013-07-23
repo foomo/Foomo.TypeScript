@@ -31,6 +31,10 @@ use Foomo\Lock;
 class TypeScript
 {
 	/**
+	 * @var string
+	 */
+	protected $name;
+	/**
 	 * @var string main src file
 	 */
 	protected $file;
@@ -76,7 +80,7 @@ class TypeScript
 	 */
 	public function getOutputPath()
 	{
-		return TypeScript\Module::getHtdocsVarPath() . '/' . $this->getOutputBasename();
+		return TypeScript\Module::getHtdocsVarBuildPath() . '/' . $this->getOutputBasename();
 	}
 	public function addOutputFilter($filter)
 	{
@@ -95,6 +99,18 @@ class TypeScript
 		return $this;
 	}
 
+	/**
+	 * makes it easier find things in your doc
+	 *
+	 * @param string $name
+	 *
+	 * @return $this
+	 */
+	public function name($name)
+	{
+		$this->name = $name;
+		return $this;
+	}
 	/**
 	 * watch for changes
 	 *
@@ -126,7 +142,7 @@ class TypeScript
 	 */
 	public function getOutputBasename()
 	{
-		return  md5($this->file) . '.js';
+		return  ($this->name?$this->name . '-':'') . md5($this->file) . '.js';
 	}
 	/**
 	 * @param string $dir absolute path of directory to look for templates for
@@ -226,12 +242,12 @@ class TypeScript
 					}
 					file_put_contents($out, $js);
 				}
-				self::fixSourceMap($out);
+				self::fixSourceMap($out, $this->getOutputPath());
 				file_put_contents(
 					$out,
 					str_replace(
-						'//@ sourceMappingURL=',
-						'//@ sourceMappingURL=' . TypeScript\Module::getHtdocsVarPath() . '/',
+						array('//@ sourceMappingURL=', '//# sourceMappingURL='),
+						'//# sourceMappingURL=' . TypeScript\Module::getHtdocsVarBuildPath() . '/',
 						file_get_contents($out)
 					)
 				);
@@ -319,8 +335,9 @@ class TypeScript
 	 * fixes the generated source map, so that it references the source server
 	 *
 	 * @param string $out tsc outfile
+	 * @param string $outPath path from the outside
 	 */
-	private static function fixSourcemap($out)
+	private static function fixSourcemap($out, $outPath)
 	{
 		$mapFile = $out . '.map';
 		$map = json_decode(file_get_contents($mapFile));
@@ -329,6 +346,7 @@ class TypeScript
 			$newSources[] = TypeScript\SourceServer::mapSource($src);
 		}
 		$map->sources = $newSources;
+		$map->file = basename($outPath);
 		file_put_contents($mapFile, json_encode($map));
 	}
 	/**

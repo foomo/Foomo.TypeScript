@@ -43,7 +43,7 @@ class SourceServer
 			}
 		}
 		unset($mappedSrc[1]);
-		return \Foomo\Utils::getServerUrl() . Module::getHtdocsPath() . '/sourceServer.php/' . implode('/', $mappedSrc);
+		return Module::getHtdocsPath() . '/sourceServer.php/' . implode('/', $mappedSrc);
 	}
 	public static function resolveSource($path)
 	{
