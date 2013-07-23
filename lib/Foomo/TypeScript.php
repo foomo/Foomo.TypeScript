@@ -242,7 +242,14 @@ class TypeScript
 					}
 					file_put_contents($out, $js);
 				}
-				self::fixSourceMap($out, $this->getOutputPath());
+				$domainConfig = Config::getConf(TypeScript\Module::NAME, TypeScript\DomainConfig::NAME);
+				if($domainConfig) {
+					$sourceMapping = $domainConfig->sourceMapping;
+				} else {
+					$sourceMapping = array();
+				}
+
+				self::fixSourceMap($out, $this->getOutputPath(), $sourceMapping);
 				file_put_contents(
 					$out,
 					str_replace(
@@ -336,14 +343,15 @@ class TypeScript
 	 *
 	 * @param string $out tsc outfile
 	 * @param string $outPath path from the outside
+	 * @param array $sourceMapping
 	 */
-	private static function fixSourcemap($out, $outPath)
+	private static function fixSourcemap($out, $outPath, array $sourceMapping)
 	{
 		$mapFile = $out . '.map';
 		$map = json_decode(file_get_contents($mapFile));
 		$newSources = array();
 		foreach($map->sources as $src) {
-			$newSources[] = TypeScript\SourceServer::mapSource($src);
+			$newSources[] = TypeScript\SourceServer::mapSource($src, $sourceMapping);
 		}
 		$map->sources = $newSources;
 		$map->file = basename($outPath);

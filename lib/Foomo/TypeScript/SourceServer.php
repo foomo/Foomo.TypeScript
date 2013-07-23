@@ -28,7 +28,7 @@ use Foomo\Modules\Manager;
  */
 class SourceServer
 {
-	public static function mapSource($src)
+	public static function mapSource($src, array $sourceMapping)
 	{
 		$parts = explode('/', $src);
 		$foundModuleRoot = false;
@@ -42,8 +42,20 @@ class SourceServer
 				$mappedSrc[] = urlencode($part);
 			}
 		}
-		unset($mappedSrc[1]);
-		return Module::getHtdocsPath() . '/sourceServer.php/' . implode('/', $mappedSrc);
+		if(!empty($sourceMapping)) {
+			$path = Config::getModuleDir() . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $mappedSrc);
+			foreach($sourceMapping as $local => $remote) {
+				if(strpos($path, $local) === 0) {
+					$path = $remote . substr($path, strlen($local));
+					break;
+				}
+			}
+			return 'file://' . $path;
+		} else {
+			//remove typescript from path
+			unset($mappedSrc[1]);
+			return Module::getHtdocsPath() . '/sourceServer.php/' . implode('/', $mappedSrc);
+		}
 	}
 	public static function resolveSource($path)
 	{
