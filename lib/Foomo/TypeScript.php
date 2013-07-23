@@ -247,7 +247,7 @@ class TypeScript
 					$out,
 					str_replace(
 						array('//@ sourceMappingURL=', '//# sourceMappingURL='),
-						'//# sourceMappingURL=' . TypeScript\Module::getHtdocsVarBuildPath() . '/',
+						'//# sourceMappingURL=',// . TypeScript\Module::getHtdocsVarBuildPath() . '/',
 						file_get_contents($out)
 					)
 				);
