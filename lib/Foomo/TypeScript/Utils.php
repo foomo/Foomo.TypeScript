@@ -84,7 +84,7 @@ class Utils
 					->getOutputFilename()
 				;
 				$moduleJSDir = \Foomo\Config::getHtdocsDir($module) . DIRECTORY_SEPARATOR . 'js';
-				$targetJSFile = $moduleJSDir . DIRECTORY_SEPARATOR . 'serviceValuObjects.js';
+				$targetJSFile = $moduleJSDir . DIRECTORY_SEPARATOR . 'serviceValueObjects.js';
 				if(is_dir($moduleJSDir)) {
 					file_put_contents(
 						$targetJSFile,
