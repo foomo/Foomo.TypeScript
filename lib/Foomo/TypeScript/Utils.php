@@ -22,6 +22,7 @@ namespace Foomo\TypeScript;
 use Foomo\Config;
 use Foomo\Modules\Manager;
 use Foomo\TypeScript\Services\TypeDefinitionRenderer;
+use Foomo\TypeScript;
 
 
 /**
@@ -77,6 +78,23 @@ class Utils
 						))
 				);
 				$buildReport[] = 'wrote ' . $bytesWritten .' to ' . $voDefsFilename;
+				$jsFileName = TypeScript::create($voDefsFilename)
+					->generateDeclaration()
+					->compile()
+					->getOutputFilename()
+				;
+				$moduleJSDir = \Foomo\Config::getHtdocsDir($module) . DIRECTORY_SEPARATOR . 'js';
+				$targetJSFile = $moduleJSDir . DIRECTORY_SEPARATOR . 'serviceValuObjects.js';
+				if(is_dir($moduleJSDir)) {
+					file_put_contents(
+						$targetJSFile,
+						file_get_contents($jsFileName)
+					);
+					$buildReport[] = 'wrote ' . $targetJSFile;
+				} else {
+					$buildReport[] = 'js dir missing did not write ' . $targetJSFile;
+				}
+
 			}
 		}
 		return $buildReport;

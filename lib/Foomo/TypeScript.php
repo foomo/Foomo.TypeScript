@@ -53,6 +53,10 @@ class TypeScript
 	/**
 	 * @var bool
 	 */
+	protected $generateDeclaration = false;
+	/**
+	 * @var bool
+	 */
 	protected $displayCompilerErrors = false;
 	const TARGET_ES3 = 'ES3';
 	const TARGET_ES5 = 'ES5';
@@ -111,6 +115,19 @@ class TypeScript
 		$this->name = $name;
 		return $this;
 	}
+
+	/**
+	 * generate a declaration file next compiled file
+	 *
+	 * @param bool $generateDeclaration
+	 *
+	 * @return $this
+	 */
+	public function generateDeclaration($generateDeclaration = true)
+	{
+		$this->generateDeclaration = $generateDeclaration;
+		return $this;
+	}
 	/**
 	 * watch for changes
 	 *
@@ -136,6 +153,14 @@ class TypeScript
 	public function getOutputFilename()
 	{
 		return TypeScript\Module::getHtdocsVarDir() . DIRECTORY_SEPARATOR . $this->getOutputBasename();
+	}
+	public function getDeclarationFilename()
+	{
+		if($this->generateDeclaration) {
+			return substr($this->file, 0, -2) . 'd.ts';
+		} else {
+			return false;
+		}
 	}
 	/**
 	 * @return string
@@ -217,6 +242,9 @@ class TypeScript
 				if($this->sourceMap) {
 					$arguments[] = '--sourcemap';
 				}
+				if($this->generateDeclaration) {
+					$arguments[] = '--declaration';
+				}
 				$arguments[] = '--out';
 				$arguments[] = $out;
 				$arguments[] = $this->file;
@@ -258,6 +286,20 @@ class TypeScript
 						file_get_contents($out)
 					)
 				);
+				if($this->generateDeclaration) {
+					$declarationFile = substr($out, 0, -2) . 'd.ts';
+					if(file_exists($declarationFile)) {
+						$targetDeclarationFile = $this->getDeclarationFilename();
+						$newContents = file_get_contents($declarationFile);
+						$oldContents = null;
+						if(file_exists($targetDeclarationFile)) {
+							$oldContents = file_get_contents($targetDeclarationFile);
+						}
+						if($oldContents != $newContents) {
+							file_put_contents($targetDeclarationFile, $newContents);
+						}
+					}
+				}
 				Lock::release($lockName);
 			}
 		}
