@@ -35,6 +35,12 @@ class TypeScript
 	 */
 	protected $name;
 	/**
+	 * custom output file
+	 *
+	 * @var string
+	 */
+	protected $out;
+	/**
 	 * @var string main src file
 	 */
 	protected $file;
@@ -84,6 +90,7 @@ class TypeScript
 	 */
 	public function getOutputPath()
 	{
+		// @todo handle custom out ...
 		return TypeScript\Module::getHtdocsVarBuildPath() . '/' . $this->getOutputBasename();
 	}
 	public function addOutputFilter($filter)
@@ -102,7 +109,11 @@ class TypeScript
 		$this->displayCompilerErrors = $display;
 		return $this;
 	}
-
+	public function out($filename)
+	{
+		$this->out = $filename;
+		return $this;
+	}
 	/**
 	 * makes it easier find things in your doc
 	 *
@@ -152,7 +163,11 @@ class TypeScript
 	 */
 	public function getOutputFilename()
 	{
-		return TypeScript\Module::getHtdocsVarDir() . DIRECTORY_SEPARATOR . $this->getOutputBasename();
+		if(!is_null($this->out)) {
+			return $this->out;
+		} else {
+			return TypeScript\Module::getHtdocsVarDir() . DIRECTORY_SEPARATOR . $this->getOutputBasename();
+		}
 	}
 	public function getDeclarationFilename()
 	{
@@ -167,7 +182,11 @@ class TypeScript
 	 */
 	public function getOutputBasename()
 	{
-		return  ($this->name?$this->name . '-':'') . md5($this->file) . '.js';
+		if(!is_null($this->out)) {
+			return basename($this->out);
+		} else {
+			return  ($this->name?$this->name . '-':'') . md5($this->file) . '.js';
+		}
 	}
 	/**
 	 * @param string $dir absolute path of directory to look for templates for
@@ -237,8 +256,9 @@ class TypeScript
 				$arguments = array('--target', $this->target);
 
 				if($this->comments) {
-					$arguments[] = '--comments';
+					// $arguments[] = '--comments';
 				}
+				$arguments[] = '--removeComments';
 				if($this->sourceMap) {
 					$arguments[] = '--sourcemap';
 				}

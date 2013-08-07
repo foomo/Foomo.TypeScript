@@ -106,11 +106,11 @@ class TypeDefinitionRenderer extends AbstractRenderer
 				return 'number' . $suffix;
 			case 'bool':
 			case 'boolean':
-				return 'bool' . $suffix;
+				return 'boolean' . $suffix;
 			case 'string':
-				return 'string' . $suffix;;
+				return 'string' . $suffix;
 			case 'null':
-				return 'undefined' . $suffix;;
+				return 'void' . $suffix;
 			default:
 				if(class_exists($type->type)) {
 					$ret = '{' . PHP_EOL;

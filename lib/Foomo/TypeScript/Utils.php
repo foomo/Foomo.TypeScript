@@ -133,7 +133,7 @@ class Utils
 		foreach(new \DirectoryIterator(Module::getHtdocsVarDir()) as $fileInfo) {
 			$name = $fileInfo->getFilename();
 			if($fileInfo->isFile() && substr($name, 0, 1) != '.') {
-				if(substr($name, -3) == '.js' || substr($name, -7) == '.js.map') {
+				if(substr($name, -3) == '.js' || substr($name, -7) == '.js.map' || substr($name, -5) == '.d.ts') {
 					if(unlink($fileInfo->getPathname())) {
 						$buildReport[] = 'removed compiled file ' . $fileInfo->getFilename();
 					} else {

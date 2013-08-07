@@ -29,7 +29,7 @@ foreach($type->constants as $name => $value):
 			$constantType = 'number';
 			break;
 		case is_bool($value):
-			$constantType = 'bool';
+			$constantType = 'boolean';
 			break;
 	}
 ?>

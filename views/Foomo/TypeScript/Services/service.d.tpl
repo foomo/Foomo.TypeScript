@@ -7,7 +7,7 @@ use Foomo\TypeScript\Rosetta;
 
 declare module <?= $model->module ?> {
 	class Operation {
-		public pending: bool;
+		public pending: boolean;
 	}
 <?
 foreach($model->operations as $op):
@@ -26,8 +26,8 @@ foreach($model->operations as $op):
 			messages: any[];
 			result: <?= Rosetta::getInterfaceName($returnType) ?><?= $returnType->isArrayOf?'[]':'' ?>;
 		};
-		execute(successHandler:(op: <?= $opName ?>) => undefined );
-		error(errorHandler:(op: <?= $opName ?>) => undefined);
+		execute(successHandler:(op: <?= $opName ?>) => void );
+		error(errorHandler:(op: <?= $opName ?>) => void);
 	}
 <? endforeach; ?>
 	var operations : {

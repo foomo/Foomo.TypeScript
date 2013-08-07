@@ -74,7 +74,7 @@ class Rosetta
 						return 'number';
 					case 'bool':
 					case 'boolean':
-						return 'bool';
+						return 'boolean';
 					case 'string':
 						return 'string';;
 					case 'null':
