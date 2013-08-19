@@ -33,6 +33,10 @@ class TypeScript
 	/**
 	 * @var string
 	 */
+	protected $hash;
+	/**
+	 * @var string
+	 */
 	protected $name;
 	/**
 	 * custom output file
@@ -82,7 +86,16 @@ class TypeScript
 	protected $watch = true;
 	private function __construct($file)
 	{
+		static $moduleDir = null;
+		if(is_null($moduleDir)) {
+			$moduleDir = Config::getModuleDir();
+		}
 		$this->file = $file;
+		if(strpos($this->file, $moduleDir) === 0) {
+			$this->hash = md5(substr($this->file, strlen($moduleDir) + 1));
+		} else {
+			$this->hash = md5($this->file);
+		}
 	}
 
 	/**
@@ -185,7 +198,7 @@ class TypeScript
 		if(!is_null($this->out)) {
 			return basename($this->out);
 		} else {
-			return  ($this->name?$this->name . '-':'') . md5($this->file) . '.js';
+			return  ($this->name?$this->name . '-':'') . $this->hash . '.js';
 		}
 	}
 	/**
@@ -302,7 +315,7 @@ class TypeScript
 					$out,
 					str_replace(
 						array('//@ sourceMappingURL=', '//# sourceMappingURL='),
-						'//# sourceMappingURL=',// . TypeScript\Module::getHtdocsVarBuildPath() . '/',
+						'//# sourceMappingURL=',
 						file_get_contents($out)
 					)
 				);
@@ -413,7 +426,7 @@ class TypeScript
 		$map = json_decode(file_get_contents($mapFile));
 		$newSources = array();
 		foreach($map->sources as $src) {
-			$newSources[] = TypeScript\SourceServer::mapSource($src, $sourceMapping);
+			$newSources[] = TypeScript\SourceServer::mapSource($src, $sourceMapping, $out);
 		}
 		$map->sources = $newSources;
 		$map->file = basename($outPath);

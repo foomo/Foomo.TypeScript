@@ -28,33 +28,36 @@ use Foomo\Modules\Manager;
  */
 class SourceServer
 {
-	public static function mapSource($src, array $sourceMapping)
+	public static function mapSource($src, array $sourceMapping, $out)
 	{
-		$parts = explode('/', $src);
-		$foundModuleRoot = false;
-		$mappedSrc = array();
-		foreach($parts as $part) {
-			if($part == 'modules') {
-				$foundModuleRoot = true;
-				continue;
-			}
-			if($foundModuleRoot) {
-				$mappedSrc[] = urlencode($part);
-			}
+		static $moduleDir = null;
+		if(is_null($moduleDir)) {
+			$moduleDir = Config::getModuleDir();
+		}
+		$originalSrc = $src;
+		$src = realpath(dirname($out) . DIRECTORY_SEPARATOR . $src);
+		if($src === false) {
+			trigger_error('could not find src ' . $src . ' in ' . dirname($out));
 		}
 		if(!empty($sourceMapping)) {
-			$path = Config::getModuleDir() . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $mappedSrc);
 			foreach($sourceMapping as $local => $remote) {
-				if(strpos($path, $local) === 0) {
-					$path = $remote . substr($path, strlen($local));
-					break;
+				if(strpos($src, $local) === 0) {
+					$src = $remote . substr($src, strlen($local));
+					return 'file://' . $src;
 				}
 			}
-			return 'file://' . $path;
+		}
+		if(strpos($src, $moduleDir) === 0) {
+			// typescript convention match
+			$parts = explode(DIRECTORY_SEPARATOR, substr($src, strlen($moduleDir) + 1));
+			if(count($parts) > 2 && $parts[1] == 'typescript') {
+				unset($parts[1]);
+				return Module::getHtdocsPath() . '/sourceServer.php/' . implode('/', $parts);
+			} else {
+				return $originalSrc;
+			}
 		} else {
-			//remove typescript from path
-			unset($mappedSrc[1]);
-			return Module::getHtdocsPath() . '/sourceServer.php/' . implode('/', $mappedSrc);
+			return $originalSrc;
 		}
 	}
 	public static function resolveSource($path)
