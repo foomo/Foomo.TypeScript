@@ -520,7 +520,7 @@ class TypeScript
 	 * be also aware, that the generated files should be ignored by your VCS
 	 * (.names might be a good idea)
 	 *
-	 * @param $template template file to generate ts from
+	 * @param string $template template file to generate ts from
 	 * @param string $name filename may include a relative path from the templates directory
 	 * @param array $data array of data that will be extracted into the template
 	 *
