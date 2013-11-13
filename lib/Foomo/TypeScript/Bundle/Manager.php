@@ -38,7 +38,7 @@ class Manager
 
 	}
 	/**
-	 * @return Mananger
+	 * @return Manager
 	 */
 	public static function getInstance()
 	{
@@ -55,9 +55,12 @@ class Manager
 	 */
 	public function registerBundle(Bundle $bundle)
 	{
-		if(!in_array($bundle, $this->bundles)) {
-			$this->bundles[] = $bundle;
+		foreach($this->bundles as $myBundle) {
+			if($bundle->name == $myBundle->name) {
+				return $this;
+			}
 		}
+		$this->bundles[] = $bundle;
 		return $this;
 	}
 	/**

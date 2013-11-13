@@ -215,7 +215,11 @@ class Bundle
 	{
 		return $this->addEntriesToPropArray($renderers, 'templateRenderers');
 	}
-	public function getTypescript()
+	public function getJSLinks()
+	{
+
+	}
+	public function getJSFiles()
 	{
 
 	}

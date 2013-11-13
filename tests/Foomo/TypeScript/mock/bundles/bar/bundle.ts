@@ -5,4 +5,4 @@
 /// <reference path='../definitions/demo.d.ts' />
 
 var foo = new Mock.Bar.BarTest();
-console.log('debug is ' + "Off");
+console.log('debug is ' + "On");

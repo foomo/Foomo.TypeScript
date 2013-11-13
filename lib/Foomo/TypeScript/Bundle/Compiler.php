@@ -77,6 +77,38 @@ class Compiler
 	public static function compile(Bundle $bundle)
 	{
 		self::preProcess($bundle);
+		$ret = array();
+		foreach(Manager::getInstance()->resolveBundles()) {
 
+		}
+		foreach($bundle->mergeBundles as $mergeBundle) {
+			if($bundle->debug) {
+
+			} else {
+
+			}
+		}
+
+		return $ret;
+	}
+	protected static function compileWithHandler($bundle, callable $handler)
+	{
+		$ret = array();
+		foreach(self::compile($bundle) as $compiledResource) {
+			$ret[] = $handler($compiledResource);
+		}
+		return $ret;
+	}
+	public static function compileToPaths(Bundle $bundle)
+	{
+		return self::compileWithHandler($bundle, function($compiledResource) {
+
+		});
+	}
+	public static function compileToLinks(Bundle $bundle)
+	{
+		return self::compileWithHandler($bundle, function($compiledResource) {
+
+		});
 	}
 }

@@ -27,6 +27,26 @@ use Foomo\Utils;
  */
 class BundleTest extends \PHPUnit_Framework_TestCase
 {
+	public function setUp()
+	{
+		self::cleanUp();
+	}
+
+	public function tearDown()
+	{
+		// self::cleanUp();
+	}
+
+
+	private function cleanUp()
+	{
+		$bundleFile = self::getBundlePath('bar') . DIRECTORY_SEPARATOR . 'bundle.ts';
+		if(file_exists($bundleFile)) {
+			unlink($bundleFile);
+		}
+	}
+
+
 	private static function getBundlePath($bundleName)
 	{
 		return __DIR__ . '/mock/bundles/' . $bundleName;
