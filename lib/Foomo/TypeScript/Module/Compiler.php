@@ -17,11 +17,9 @@
  * the foomo Opensource Framework. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Foomo\TypeScript\Bundle;
+namespace Foomo\TypeScript\Module;
 
-use Foomo\Template;
-use Foomo\TypeScript\Bundle;
-use Foomo\View;
+use Foomo\Modules\MakeResult;
 
 /**
  * @link www.foomo.org
@@ -74,41 +72,5 @@ class Compiler
 			return $to;
 		}
 	}
-	public static function compile(Bundle $bundle)
-	{
-		self::preProcess($bundle);
-		$ret = array();
-		foreach(Manager::getInstance()->resolveBundles()) {
 
-		}
-		foreach($bundle->mergeBundles as $mergeBundle) {
-			if($bundle->debug) {
-
-			} else {
-
-			}
-		}
-
-		return $ret;
-	}
-	protected static function compileWithHandler($bundle, callable $handler)
-	{
-		$ret = array();
-		foreach(self::compile($bundle) as $compiledResource) {
-			$ret[] = $handler($compiledResource);
-		}
-		return $ret;
-	}
-	public static function compileToPaths(Bundle $bundle)
-	{
-		return self::compileWithHandler($bundle, function($compiledResource) {
-
-		});
-	}
-	public static function compileToLinks(Bundle $bundle)
-	{
-		return self::compileWithHandler($bundle, function($compiledResource) {
-
-		});
-	}
 }

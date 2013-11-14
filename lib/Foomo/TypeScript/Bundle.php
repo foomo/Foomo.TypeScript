@@ -19,22 +19,17 @@
 
 namespace Foomo\TypeScript;
 
+use Foomo\JS\Bundle\AbstractBundle;
 use Foomo\Modules\MakeResult;
 
 /**
  * @link www.foomo.org
  * @license www.gnu.org/licenses/lgpl.txt
  */
-class Bundle
+class Bundle extends AbstractBundle
 {
-	/**
-	 * @var string
-	 */
-	public $name;
-	/**
-	 * @var bool
-	 */
-	public $debug;
+
+
 	/**
 	 * @var string
 	 */
@@ -43,15 +38,7 @@ class Bundle
 	 * @var string[]
 	 */
 	public $paths = array();
-	/**
-	 * @var string[]
-	 */
-	public $javaScripts = array();
-	/**
-	 * @var Bundle[]
-	 */
-	public $dependencies = array();
-	public $mergeBundles = array();
+
 	/**
 	 * @var bool
 	 */
@@ -68,67 +55,8 @@ class Bundle
 	 * @var mixed
 	 */
 	public $preProcessingData;
-	private function __construct($name)
-	{
-		$this->name = $name;
-	}
-	/**
-	 * @param string $name
-	 *
-	 * @return Bundle
-	 */
-	public static function create($name)
-	{
-		return new self($name);
-	}
 
-	/**
-	 * merge with another bundle
-	 *
-	 * @param Bundle $bundle
-	 *
-	 * @return Bundle
-	 */
-	public function merge(Bundle $bundle)
-	{
-		$this->mergeBundles[] = $bundle;
-		return $this;
-	}
-	/**
-	 * @param Bundle $bundle
-	 *
-	 * @return Bundle
-	 */
-	public function addDependency(Bundle $bundle)
-	{
-		return $this->addEntryToPropArray($bundle, 'dependencies');
-	}
-	/**
-	 * @param Bundle[] $bundles
-	 *
-	 * @return Bundle
-	 */
-	public function addDependencies(array $bundles)
-	{
-		return $this->addEntriesToPropArray($bundles, 'dependencies');
-	}
-	/**
-	 * @param string $script
-	 * @return Bundle
-	 */
-	public function addJavascript($script)
-	{
-		return $this->addEntryToPropArray($script, 'javaScripts');
-	}
 
-	/**
-	 * @param string[] $scripts
-	 * @return Bundle
-	 */
-	public function addJavaScripts(array $scripts)
-	{
-		return $this->addEntriesToPropArray($scripts, 'javaScripts');
-	}
 	/**
 	 * @param string[] $paths
 	 *
@@ -180,15 +108,7 @@ class Bundle
 		$this->locale = $locale;
 		return $this;
 	}
-	/**
-	 * @param bool $debug
-	 * @return Bundle
-	 */
-	public function debug($debug)
-	{
-		$this->debug = $debug;
-		return $this;
-	}
+
 	/**
 	 * @param $data
 	 *
@@ -215,43 +135,7 @@ class Bundle
 	{
 		return $this->addEntriesToPropArray($renderers, 'templateRenderers');
 	}
-	public function getJSLinks()
-	{
 
-	}
-	public function getJSFiles()
-	{
-
-	}
-	/**
-	 * @param array $entries
-	 * @param string $propArrayName
-	 *
-	 * @return Bundle
-	 */
-	private function addEntriesToPropArray(array $entries, $propArrayName)
-	{
-		foreach($entries as $entry) {
-			$this->addEntryToPropArray($entry, $propArrayName);
-		}
-		return $this;
-	}
-	/**
-	 * @param string $entry
-	 * @param string $propArrayName
-	 * @return Bundle
-	 */
-	private function addEntryToPropArray($entry, $propArrayName)
-	{
-		if(!in_array($entry, $this->{$propArrayName})) {
-			$this->{$propArrayName}[] = $entry;
-		}
-		return $this;
-	}
-	public function getTimestamp()
-	{
-
-	}
 	public function getBundleFile()
 	{
 		foreach($this->paths as $path) {
@@ -262,6 +146,7 @@ class Bundle
 		}
 		trigger_error('could not find the bundle file', E_USER_ERROR);
 	}
+	
 	public function getAllTypeScriptFiles()
 	{
 		$typescriptFiles = array();
@@ -272,6 +157,7 @@ class Bundle
 		sort($typescriptFiles);
 		return $typescriptFiles;
 	}
+	
 	public function lookForFilesWithSuffixInPath($path, $suffix, array &$typescriptFiles)
 	{
 		$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::CHILD_FIRST);
@@ -282,6 +168,7 @@ class Bundle
 			}
 		}
 	}
+	
 	public function getAllTypeDefinitionFiles()
 	{
 		$typeDefinitionFiles = array();
@@ -295,10 +182,6 @@ class Bundle
 		$typeDefinitionFiles = array_unique($typeDefinitionFiles);
 		sort($typeDefinitionFiles);
 		return $typeDefinitionFiles;
-	}
-	public function getFingerprint()
-	{
-
 	}
 	/**
 	 * @param Bundle[] $satisfyingBundles
@@ -320,4 +203,29 @@ class Bundle
 		}
 		return true;
 	}
+
+	/**
+	 * compile things, that need to be compiled
+	 *
+	 * @return AbstractBundle
+	 */
+	public function compile() {}
+
+	/**
+	 * js URIs to be added to a HTML document
+	 *
+	 * typically many in debug and few in non debug
+	 *
+	 * @return string[]
+	 */
+	public function getJSLinks() {}
+
+	/**
+	 * absolute paths to the js files
+	 *
+	 * typically many in debug and few in non debug
+	 *
+	 * @return string[]
+	 */
+	public function getJSFiles() {}	
 }
