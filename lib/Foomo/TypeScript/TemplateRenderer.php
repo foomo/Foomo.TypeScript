@@ -27,10 +27,18 @@ use Foomo\Template;
  */
 class TemplateRenderer
 {
+	/**
+	 * @var string
+	 */
 	protected $templateFile;
+	/**
+	 * @var string
+	 */
 	protected $targetFile;
+	/**
+	 * @var mixed
+	 */
 	protected $templateModel;
-
 	/**
 	 * @param string $targetFile where to write the generated code to
 	 * @param string $templateFile which template to use for the template generation
@@ -51,7 +59,7 @@ class TemplateRenderer
 				'templates' => $templates
 			)
 		);
- 		if($templateString != file_get_contents($this->targetFile)) {
+ 		if(!file_exists($this->targetFile) || $templateString != file_get_contents($this->targetFile)) {
 			file_put_contents(
 				$this->targetFile,
 				$templateString
