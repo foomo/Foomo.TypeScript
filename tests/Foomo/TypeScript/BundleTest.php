@@ -53,29 +53,12 @@ class BundleTest extends \PHPUnit_Framework_TestCase
 	}
 	private static function getBarBundle()
 	{
-		return Bundle::create('bar')
-			->addFolder(self::getBundlePath('bar'))
-			->addFolder(self::getBundlePath('alsoBar'))
-			->addTypeDefinition(self::getBundlePath('definitions'))
+		return Bundle::create('bar', self::getBundlePath('bar'))
 			->preProcessWithData(array('debug' => true))
 			->writeTypeDefinition()
 		;
 	}
 
-	public function testPaths()
-	{
-		$bundle = Bundle::create('test')
-			->addFolder(self::getBundlePath('bar'))
-			->addFolders(array(
-				self::getBundlePath('foo'),
-				self::getBundlePath('bar')
-			))
-		;
-		$this->assertEquals(array(
-			self::getBundlePath('bar'),
-			self::getBundlePath('foo')
-		), $bundle->paths);
-	}
 	public function testFolderReferences()
 	{
 		$bundle = self::getBarBundle();

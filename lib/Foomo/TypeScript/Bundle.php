@@ -20,6 +20,7 @@
 namespace Foomo\TypeScript;
 
 use Foomo\JS\Bundle\AbstractBundle;
+use Foomo\JS\Bundle\Compiler\Result;
 use Foomo\Modules\MakeResult;
 
 /**
@@ -28,25 +29,19 @@ use Foomo\Modules\MakeResult;
  */
 class Bundle extends AbstractBundle
 {
-
-
 	/**
 	 * @var string
 	 */
 	public $locale;
 	/**
-	 * @var string[]
+	 * @var string
 	 */
-	public $paths = array();
+	public $path;
 
 	/**
 	 * @var bool
 	 */
 	public $writeTypeDefinition = false;
-	/**
-	 * @var string[]
-	 */
-	public $typeDefinitions = array();
 	/**
 	 * @var TemplateRenderer[]
 	 */
@@ -57,42 +52,6 @@ class Bundle extends AbstractBundle
 	public $preProcessingData;
 
 
-	/**
-	 * @param string[] $paths
-	 *
-	 * @return Bundle
-	 */
-	public function addFolders(array $paths)
-	{
-		return $this->addEntriesToPropArray($paths, 'paths');
-	}
-	/**
-	 * @param string $path
-	 *
-	 * @return Bundle
-	 */
-	public function addFolder($path)
-	{
-		return $this->addEntryToPropArray($path, 'paths');
-	}
-	/**
-	 * @param string $typeDefinition
-	 *
-	 * @return Bundle
-	 */
-	public function addTypeDefinition($typeDefinition)
-	{
-		return $this->addEntryToPropArray($typeDefinition, 'typeDefinitions');
-	}
-	/**
-	 * @param string[] $typeDefinitions
-	 *
-	 * @return $this
-	 */
-	public function addTypeDefinitions(array $typeDefinitions)
-	{
-		return $this->addEntriesToPropArray($typeDefinitions, 'typeDefinitions');
-	}
 	/**
 	 * @param bool $yesOrNo
 	 *
@@ -135,14 +94,11 @@ class Bundle extends AbstractBundle
 	{
 		return $this->addEntriesToPropArray($renderers, 'templateRenderers');
 	}
-
 	public function getBundleFile()
 	{
-		foreach($this->paths as $path) {
-			$bundleFile = $path . DIRECTORY_SEPARATOR . 'bundle.ts.tpl';
-			if(file_exists($bundleFile)) {
-				return $bundleFile;
-			}
+		$bundleFile = $this->path . DIRECTORY_SEPARATOR . 'bundle.ts.tpl';
+		if(file_exists($bundleFile)) {
+			return $bundleFile;
 		}
 		trigger_error('could not find the bundle file', E_USER_ERROR);
 	}
@@ -168,7 +124,6 @@ class Bundle extends AbstractBundle
 			}
 		}
 	}
-	
 	public function getAllTypeDefinitionFiles()
 	{
 		$typeDefinitionFiles = array();
@@ -183,49 +138,23 @@ class Bundle extends AbstractBundle
 		sort($typeDefinitionFiles);
 		return $typeDefinitionFiles;
 	}
-	/**
-	 * @param Bundle[] $satisfyingBundles
-	 * @return bool
-	 */
-	public function dependenciesAreSatisfiedBy(array $satisfyingBundles)
+	public function compile(Result $result)
 	{
-		foreach($this->dependencies as $dependencyBundle) {
-			$satisfied = false;
-			foreach($satisfyingBundles as $satisfyingBundle) {
-				if($satisfyingBundle->getFingerprint() == $dependencyBundle->getFingerprint()) {
-					$satisfied = true;
-					break;
-				}
-			}
-			if(!$satisfied) {
-				return false;
-			}
-		}
-		return true;
+
 	}
 
 	/**
-	 * compile things, that need to be compiled
 	 *
-	 * @return AbstractBundle
+	 *
+	 * @param string $name
+	 * @param string $path
+	 *
+	 * @return Bundle
 	 */
-	public function compile() {}
-
-	/**
-	 * js URIs to be added to a HTML document
-	 *
-	 * typically many in debug and few in non debug
-	 *
-	 * @return string[]
-	 */
-	public function getJSLinks() {}
-
-	/**
-	 * absolute paths to the js files
-	 *
-	 * typically many in debug and few in non debug
-	 *
-	 * @return string[]
-	 */
-	public function getJSFiles() {}	
+	public static function create($name, $path)
+	{
+		$ret = parent::create($name);
+		$ret->path = $path;
+		return $ret;
+	}
 }
