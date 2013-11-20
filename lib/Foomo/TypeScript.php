@@ -248,6 +248,7 @@ class TypeScript
 	 */
 	public function compile()
 	{
+		// fuckoff();
 		$out = $this->getOutputFilename();
 		if($this->watch || !file_exists($out)) {
 			$lockName = 'tsLock-' . basename($out);
@@ -282,16 +283,18 @@ class TypeScript
 				$arguments[] = $out;
 				$arguments[] = $this->file;
 				$call = CliCall::create('tsc', $arguments);
+				// trigger_error($call->renderCommand() . ' ' . var_export($arguments, true));
 				$call->execute();
 				if($call->exitStatus !== 0) {
+					trigger_error('WTF' . $call->report, E_USER_WARNING);
 					if(file_exists($out)) {
 						unlink($out);
 					}
 					if($this->displayCompilerErrors) {
 						ErrorRenderer::renderError($call);
+						trigger_error('tsc threw up ' . $call->report, E_USER_ERROR);
 						exit;
 					}
-					trigger_error('tsc threw up ' . $call->report, E_USER_ERROR);
 				} else {
 					Utils::appendToPhpErrorLog($call->report);
 				}
@@ -323,7 +326,7 @@ class TypeScript
 					$declarationFile = substr($out, 0, -2) . 'd.ts';
 					if(file_exists($declarationFile)) {
 						$targetDeclarationFile = $this->getDeclarationFilename();
-						$newContents = file_get_contents($declarationFile);
+						$newContents = self::moveReferencesInDeclaration(file_get_contents($declarationFile), $declarationFile, $targetDeclarationFile);
 						$oldContents = null;
 						if(file_exists($targetDeclarationFile)) {
 							$oldContents = file_get_contents($targetDeclarationFile);
@@ -338,7 +341,46 @@ class TypeScript
 		}
 		return $this;
 	}
-
+	public static function getRelativePathFromFolderToFile($from, $to)
+	{
+		$fromParts = array_slice(explode(DIRECTORY_SEPARATOR, $from), 1);
+		$toParts = array_slice(explode(DIRECTORY_SEPARATOR, $to), 1);
+		$inCommon = 0;
+		$samePath = true;
+		for($i = 0; $i < count($fromParts); $i++) {
+			if(count($toParts) < $i || $fromParts[$i] != $toParts[$i]) {
+				$samePath = false;
+			}
+			if($samePath) {
+				$inCommon ++;
+			}
+		}
+		if($inCommon > 0 && !$samePath) {
+			$runUpPart = str_repeat('..' . DIRECTORY_SEPARATOR, count($fromParts) - $inCommon);
+			$sliceFrom = count($toParts) - $inCommon;
+			$runDownPart = implode(DIRECTORY_SEPARATOR, array_slice($toParts, - $sliceFrom));
+			return $runUpPart . $runDownPart;
+		} else if($samePath) {
+			return substr($to, strlen($from) + 1);
+		} else {
+			return $to;
+		}
+	}
+	public static function moveReferencesInDeclaration($declaration, $from, $to)
+	{
+		$newDeclaration = '';
+		$declarationLines = explode(PHP_EOL, $declaration);
+		$dir = dirname($from);
+		$toDir = dirname($to);
+		foreach($declarationLines as $declarationLine) {
+			if($dependency = self::extractReferenceFromLineStringInDir($declarationLine, $dir)) {
+				$dependency = self::getRelativePathFromFolderToFile($toDir, $dependency);
+				$declarationLine = '/// <reference path=\'' . htmlspecialchars($dependency) . '\' />';
+			}
+			$newDeclaration .= $declarationLine . PHP_EOL;
+		}
+		return $newDeclaration;
+	}
 	/**
 	 * @param array $templateJobs
 	 *
@@ -485,18 +527,26 @@ class TypeScript
 		$lines = explode(PHP_EOL, file_get_contents($filename));
 		$dir = dirname($filename);
 		foreach($lines as $line) {
-			$line = trim($line);
-			if(substr($line, 0, 3) == '///' && strpos($line, '<reference path=') !== false) {
-				$line = trim(substr($line, 3));
-				$quote = substr($line, 16, 1);
-				$line = substr($line, 17);
-				$filename = realpath($dir . DIRECTORY_SEPARATOR . substr($line, 0, strpos($line, $quote)));
-				if(file_exists($filename)) {
-					$deps[] = $filename;
-				}
+			if($dep = self::extractReferenceFromLineStringInDir($line, $dir)) {
+				$deps[] = $dep;
 			}
 		}
 		return $deps;
+	}
+
+	private static function extractReferenceFromLineStringInDir($line, $dir)
+	{
+		$line = trim($line);
+		if(substr($line, 0, 3) == '///' && strpos($line, '<reference path=') !== false) {
+			$line = trim(substr($line, 3));
+			$quote = substr($line, 16, 1);
+			$line = substr($line, 17);
+			$filename = realpath($dir . DIRECTORY_SEPARATOR . substr($line, 0, strpos($line, $quote)));
+			if(file_exists($filename)) {
+				return $filename;
+			}
+		}
+		return false;
 	}
 	/**
 	 * @param string $file .ts main source file as an absolute path

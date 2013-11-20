@@ -26,37 +26,6 @@ namespace Foomo\TypeScript\Bundle;
  */
 class CompilerTest extends \PHPUnit_Framework_TestCase
 {
-	public function testRelativePathInSameFolder()
-	{
-		$this->assertEquals(
-			'test.ts',
-			Compiler::getRelativePathFromFolderToFile('/foo', '/foo/test.ts')
-		);
-		$this->assertEquals(
-			'tief/tiefer/test.ts',
-			Compiler::getRelativePathFromFolderToFile('/toll', '/toll/tief/tiefer/test.ts')
-		);
-	}
-	public function testRelativeForMyNeighbour()
-	{
-		$this->assertEquals(
-			'../bar/test.ts',
-			Compiler::getRelativePathFromFolderToFile('/foo/la/boo', '/foo/la/bar/test.ts')
-		);
-		$this->assertEquals(
-			'../alsoBar/also.ts',
-			Compiler::getRelativePathFromFolderToFile(
-				'/var/www/paperRoll/modules/Foomo.TypeScript/tests/Foomo/TypeScript/mock/bundles/bar',
-				'/var/www/paperRoll/modules/Foomo.TypeScript/tests/Foomo/TypeScript/mock/bundles/alsoBar/also.ts'
-			)
-		);
-	}
-	public function testNoNeighbours()
-	{
-		$this->assertEquals(
-			'/foo/la/bar/test.ts',
-			Compiler::getRelativePathFromFolderToFile('/bla', '/foo/la/bar/test.ts')
-		);
-	}
+
 
 }

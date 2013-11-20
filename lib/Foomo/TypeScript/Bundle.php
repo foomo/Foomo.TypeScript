@@ -22,6 +22,7 @@ namespace Foomo\TypeScript;
 use Foomo\JS\Bundle\AbstractBundle;
 use Foomo\JS\Bundle\Compiler\Result;
 use Foomo\Modules\MakeResult;
+use Foomo\TypeScript;
 
 /**
  * @link www.foomo.org
@@ -37,19 +38,19 @@ class Bundle extends AbstractBundle
 	 * @var string
 	 */
 	public $path;
-
+	/**
+	 * @var string
+	 */
+	public $target = TypeScript::TARGET_ES3;
 	/**
 	 * @var bool
 	 */
 	public $writeTypeDefinition = false;
-	/**
-	 * @var TemplateRenderer[]
-	 */
-	public $templateRenderers = array();
+	public $templateJobs = array();
 	/**
 	 * @var mixed
 	 */
-	public $preProcessingData;
+	public $preProcessingData = array();
 
 
 	/**
@@ -69,6 +70,16 @@ class Bundle extends AbstractBundle
 	}
 
 	/**
+	 * @param string $target
+	 * @return $this
+	 */
+	public function target($target)
+	{
+		$this->target = $target;
+		return $this;
+	}
+
+	/**
 	 * @param $data
 	 *
 	 * @return Bundle
@@ -78,37 +89,26 @@ class Bundle extends AbstractBundle
 		$this->preProcessingData = $data;
 		return $this;
 	}
+
 	/**
+	 * @param $dir
 	 * @param TemplateRenderer $renderer
-	 * @return Bundle
+	 * @return $this
 	 */
-	public function addTemplateRenderer(TemplateRenderer $renderer)
+	public function lookForTemplates($dir, TemplateRenderer $renderer)
 	{
-		return $this->addEntryToPropArray($renderer, 'templateRenderers');
-	}
-	/**
-	 * @param TemplateRenderer[] $renderers
-	 * @return Bundle
-	 */
-	public function addTemplateRenderers(array $renderers)
-	{
-		return $this->addEntriesToPropArray($renderers, 'templateRenderers');
+		$this->templateJobs[] = array('renderer' => $renderer, 'dir' => $dir);
+		return $this;
 	}
 	public function getBundleFile()
 	{
-		$bundleFile = $this->path . DIRECTORY_SEPARATOR . 'bundle.ts.tpl';
-		if(file_exists($bundleFile)) {
-			return $bundleFile;
-		}
-		trigger_error('could not find the bundle file', E_USER_ERROR);
+		return $this->path . DIRECTORY_SEPARATOR . 'bundle.ts.tpl';
 	}
 	
 	public function getAllTypeScriptFiles()
 	{
 		$typescriptFiles = array();
-		foreach($this->paths as $path) {
-			$this->lookForFilesWithSuffixInPath($path, '.ts', $typescriptFiles);
-		}
+		$this->lookForFilesWithSuffixInPath($this->path, '.ts', $typescriptFiles);
 		$typescriptFiles = array_unique($typescriptFiles);
 		sort($typescriptFiles);
 		return $typescriptFiles;
@@ -124,23 +124,9 @@ class Bundle extends AbstractBundle
 			}
 		}
 	}
-	public function getAllTypeDefinitionFiles()
-	{
-		$typeDefinitionFiles = array();
-		foreach($this->typeDefinitions as $fileOrFolder) {
-			if(is_dir($fileOrFolder)) {
-				self::lookForFilesWithSuffixInPath($fileOrFolder, '.d.ts' , $typeDefinitionFiles);
-			} else {
-				$typeDefinitionFiles[] = $fileOrFolder;
-			}
-		}
-		$typeDefinitionFiles = array_unique($typeDefinitionFiles);
-		sort($typeDefinitionFiles);
-		return $typeDefinitionFiles;
-	}
 	public function compile(Result $result)
 	{
-
+		Bundle\Compiler::compile($this, $result);
 	}
 
 	/**

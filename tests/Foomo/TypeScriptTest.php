@@ -49,4 +49,37 @@ class TypeScriptTest extends \PHPUnit_Framework_TestCase
 		$deps = TypeScript::resolveDependencies($testDir . DIRECTORY_SEPARATOR . 'references.ts');
 		$this->assertCount(5, $deps);
 	}
+
+	public function testRelativePathInSameFolder()
+	{
+		$this->assertEquals(
+			'test.ts',
+			TypeScript::getRelativePathFromFolderToFile('/foo', '/foo/test.ts')
+		);
+		$this->assertEquals(
+			'tief/tiefer/test.ts',
+			TypeScript::getRelativePathFromFolderToFile('/toll', '/toll/tief/tiefer/test.ts')
+		);
+	}
+	public function testRelativeForMyNeighbour()
+	{
+		$this->assertEquals(
+			'../bar/test.ts',
+			TypeScript::getRelativePathFromFolderToFile('/foo/la/boo', '/foo/la/bar/test.ts')
+		);
+		$this->assertEquals(
+			'../alsoBar/also.ts',
+			TypeScript::getRelativePathFromFolderToFile(
+				'/var/www/paperRoll/modules/Foomo.TypeScript/tests/Foomo/TypeScript/mock/bundles/bar',
+				'/var/www/paperRoll/modules/Foomo.TypeScript/tests/Foomo/TypeScript/mock/bundles/alsoBar/also.ts'
+			)
+		);
+	}
+	public function testNoNeighbours()
+	{
+		$this->assertEquals(
+			'/foo/la/bar/test.ts',
+			TypeScript::getRelativePathFromFolderToFile('/bla', '/foo/la/bar/test.ts')
+		);
+	}
 }

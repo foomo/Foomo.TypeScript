@@ -19,6 +19,7 @@
 
 namespace Foomo\TypeScript;
 
+use Foomo\JS\Bundle\Compiler\Result;
 use Foomo\Utils;
 
 /**
@@ -31,13 +32,10 @@ class BundleTest extends \PHPUnit_Framework_TestCase
 	{
 		self::cleanUp();
 	}
-
 	public function tearDown()
 	{
-		// self::cleanUp();
+		self::cleanUp();
 	}
-
-
 	private function cleanUp()
 	{
 		$bundleFile = self::getBundlePath('bar') . DIRECTORY_SEPARATOR . 'bundle.ts';
@@ -45,8 +43,6 @@ class BundleTest extends \PHPUnit_Framework_TestCase
 			unlink($bundleFile);
 		}
 	}
-
-
 	private static function getBundlePath($bundleName)
 	{
 		return __DIR__ . '/mock/bundles/' . $bundleName;
@@ -58,11 +54,10 @@ class BundleTest extends \PHPUnit_Framework_TestCase
 			->writeTypeDefinition()
 		;
 	}
-
 	public function testFolderReferences()
 	{
 		$bundle = self::getBarBundle();
-		Bundle\Compiler::compile($bundle);
+		Bundle\Compiler::compile($bundle, $result = new Result());
 		$this->assertContains(
 			'/// <reference path=\'test' . DIRECTORY_SEPARATOR . 'nestedBar.ts\' />',
 			file_get_contents(self::getBundlePath('bar') . DIRECTORY_SEPARATOR . 'bundle.ts')
