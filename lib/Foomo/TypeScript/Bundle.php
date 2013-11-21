@@ -137,8 +137,9 @@ class Bundle extends AbstractBundle
 	 *
 	 * @return Bundle
 	 */
-	public static function create($name, $path)
+	public static function create($name)
 	{
+		$path = func_get_arg(1);
 		$ret = parent::create($name);
 		$ret->path = $path;
 		return $ret;
