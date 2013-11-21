@@ -107,8 +107,13 @@ class Utils
 		foreach(self::getAllServices() as $module => $serviceDescriptions) {
 			$moduleTypes[$module] = array();
 			foreach($serviceDescriptions as $serviceDescription) {
-				/* @var $serviceDescription \Foomo\Services\ServiceDescription */
 				$typescriptModuleDir = \Foomo\Config::getModuleDir($module) . DIRECTORY_SEPARATOR . 'typescript';
+				$moduleVoDeclarationFile = $typescriptModuleDir . DIRECTORY_SEPARATOR . 'serviceValueObjects.d.ts';
+				if(file_exists($moduleVoDeclarationFile)) {
+					unlink($moduleVoDeclarationFile);
+					$buildReport[] = 'removing value object declaration file serviceValueObjects.d.ts for module ' . $module;
+				}
+				/* @var $serviceDescription \Foomo\Services\ServiceDescription */
 				$typescriptDirs[$module] = $typescriptModuleDir;
 				$tsFile = $typescriptModuleDir . DIRECTORY_SEPARATOR . $serviceDescription->package . '.d.ts';
 				if(file_exists($tsFile)) {

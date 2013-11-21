@@ -33,6 +33,7 @@ class ErrorRenderer
 	public static function renderError(CliCall $call)
 	{
 		MVC::abort();
+		header('Content-Type: text/html;charset=utf-8;');
 		$doc = new \Foomo\HTMLDocument();
 		$doc->addStylesheets(array(
 			Module::getHtdocsPath('css/errorRenderer.css')
