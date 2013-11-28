@@ -19,7 +19,7 @@
 
 namespace Foomo\TypeScript\Bundle;
 
-use Foomo\JS\Bundle\Compiler\Result;
+use Foomo\Bundle\Compiler\Result;
 use Foomo\JS;
 use Foomo\Template;
 use Foomo\TypeScript\Bundle;
@@ -71,17 +71,18 @@ class Compiler
 			$tsCompiler->lookForTemplates($templateJob['dir'], $templateJob['renderer']);
 		}
 		$tsCompiler->compile();
+		$result->mimeType = Result::MIME_TYPE_JS;
 		if($bundle->debug) {
-			$result->jsFiles[] = $tsCompiler->getOutputFilename();
-			$result->jsLinks[] = $tsCompiler->getOutputPath();
+			$result->files[] = $tsCompiler->getOutputFilename();
+			$result->links[] = $tsCompiler->getOutputPath();
 		} else {
 			$jsCompiler = JS::create($tsCompiler->getOutputFilename())
 				->name($bundle->name)
 				->compress()
 				->compile()
 			;
-			$result->jsFiles[] = $jsCompiler->getOutputFilename();
-			$result->jsLinks[] = $jsCompiler->getOutputPath();
+			$result->files[] = $jsCompiler->getOutputFilename();
+			$result->links[] = $jsCompiler->getOutputPath();
 		}
 	}
 }
