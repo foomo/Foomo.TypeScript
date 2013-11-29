@@ -129,6 +129,10 @@ class Bundle extends AbstractBundle
 	{
 		Bundle\Compiler::compile($this, $result);
 	}
+	public static function canMerge($mimeType)
+	{
+		return JS\Bundle::canMerge($mimeType);
+	}
 	public static function mergeFiles(array $files, $debug)
 	{
 		return JS\Bundle::mergeFiles($files, $debug);

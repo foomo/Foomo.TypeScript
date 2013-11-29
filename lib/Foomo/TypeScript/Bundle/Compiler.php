@@ -71,18 +71,22 @@ class Compiler
 			$tsCompiler->lookForTemplates($templateJob['dir'], $templateJob['renderer']);
 		}
 		$tsCompiler->compile();
-		$result->mimeType = Result::MIME_TYPE_JS;
 		if($bundle->debug) {
-			$result->files[] = $tsCompiler->getOutputFilename();
-			$result->links[] = $tsCompiler->getOutputPath();
+			$file = $tsCompiler->getOutputFilename();
+			$link = $tsCompiler->getOutputPath();
 		} else {
 			$jsCompiler = JS::create($tsCompiler->getOutputFilename())
 				->name($bundle->name)
 				->compress()
 				->compile()
 			;
-			$result->files[] = $jsCompiler->getOutputFilename();
-			$result->links[] = $jsCompiler->getOutputPath();
+			$file = $jsCompiler->getOutputFilename();
+			$link = $jsCompiler->getOutputPath();
 		}
+		$result->resources[] = Result\Resource::create(
+			Result\Resource::MIME_TYPE_JS,
+			$file,
+			$link
+		);
 	}
 }
