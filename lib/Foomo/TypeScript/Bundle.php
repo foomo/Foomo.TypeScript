@@ -19,8 +19,9 @@
 
 namespace Foomo\TypeScript;
 
-use Foomo\JS\Bundle\AbstractBundle;
-use Foomo\JS\Bundle\Compiler\Result;
+use Foomo\Bundle\AbstractBundle;
+use Foomo\Bundle\Compiler\Result;
+use Foomo\JS;
 use Foomo\Modules\MakeResult;
 use Foomo\TypeScript;
 
@@ -128,7 +129,14 @@ class Bundle extends AbstractBundle
 	{
 		Bundle\Compiler::compile($this, $result);
 	}
-
+	public static function canMerge($mimeType)
+	{
+		return JS\Bundle::canMerge($mimeType);
+	}
+	public static function mergeFiles(array $files, $debug)
+	{
+		return JS\Bundle::mergeFiles($files, $debug);
+	}
 	/**
 	 *
 	 *

@@ -19,7 +19,7 @@
 
 namespace Foomo\TypeScript;
 
-use Foomo\JS\Bundle\Compiler\Result;
+use Foomo\Bundle\Compiler\Result;
 use Foomo\Utils;
 
 /**

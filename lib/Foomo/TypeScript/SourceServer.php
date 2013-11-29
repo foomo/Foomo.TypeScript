@@ -26,82 +26,17 @@ use Foomo\Modules\Manager;
  * @link www.foomo.org
  * @license www.gnu.org/licenses/lgpl.txt
  */
-class SourceServer
+class SourceServer extends \Foomo\Bundle\SourceServer
 {
-	public static function mapSource($src, array $sourceMapping, $out)
+
+	public static function getMimetype($filename)
 	{
-		static $moduleDir = null;
-		if(is_null($moduleDir)) {
-			$moduleDir = Config::getModuleDir();
-		}
-		$originalSrc = $src;
-		$src = realpath(dirname($out) . DIRECTORY_SEPARATOR . $src);
-		if($src === false) {
-			trigger_error('could not find src ' . $src . ' in ' . dirname($out));
-		}
-		if(!empty($sourceMapping)) {
-			foreach($sourceMapping as $local => $remote) {
-				if(strpos($src, $local) === 0) {
-					$src = $remote . substr($src, strlen($local));
-					return 'file://' . $src;
-				}
-			}
-		}
-		if(strpos($src, $moduleDir) === 0) {
-			// typescript convention match
-			$parts = explode(DIRECTORY_SEPARATOR, substr($src, strlen($moduleDir) + 1));
-			if(count($parts) > 2 && $parts[1] == 'typescript') {
-				unset($parts[1]);
-				return Module::getHtdocsPath() . '/sourceServer.php/' . implode('/', $parts);
-			} else {
-				return $originalSrc;
-			}
-		} else {
-			return $originalSrc;
-		}
-	}
-	public static function resolveSource($path)
-	{
-		$parts = explode('/', $path);
-		if(count($parts) > 1) {
-			$moduleName = $parts[0];
-			if(Manager::isModuleEnabled($moduleName)) {
-				$filename = Config::getModuleDir($moduleName) . DIRECTORY_SEPARATOR . 'typescript';
-				if(file_exists($filename) == is_dir($filename)) {
-					unset($parts[0]);
-					$filename = realpath($filename) . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $parts);
-					if($filename == realpath($filename)) {
-						return $filename;
-					} else {
-						trigger_error('smbdy is trying to bullshit us and trying to exit the typescript dir for a module ' . $filename . ' != ' . realpath($filename), E_USER_WARNING);
-						return null;
-					}
-				} else {
-					trigger_error('module has no typescript dir', E_USER_WARNING);
-					return null;
-				}
-			}
-		} else {
-			trigger_error('illegal path to resolve');
-			return null;
-		}
-		return '';
+		return 'text/x-typescript';
 	}
 
-	public static function run()
+	public static function getModuleRootFolder()
 	{
-		header('Content-Type: text/x-typescript');
-		if(!Config::isProductionMode()) {
-			$path = substr($_SERVER['REQUEST_URI'], strlen($_SERVER['SCRIPT_NAME']) + 1);
-			$sourceFilename = self::resolveSource($path);
-			if(file_exists($sourceFilename)) {
-				echo file_get_contents($sourceFilename);
-			} else {
-				trigger_error('could not resolve typescript source', E_USER_WARNING);
-				echo '// source not found';
-			}
-		} else {
-			echo '// no sources in prod mode';
-		}
+		return 'typescript';
 	}
+
 }
