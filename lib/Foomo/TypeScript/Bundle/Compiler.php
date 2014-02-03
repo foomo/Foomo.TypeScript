@@ -72,6 +72,9 @@ class Compiler
 		foreach($bundle->templateJobs as $templateJob) {
 			$tsCompiler->lookForTemplates($templateJob['dir'], $templateJob['renderer']);
 		}
+		foreach($bundle->outputFilters as $outputFilter) {
+			$tsCompiler->addOutputFilter($outputFilter);
+		}
 		$tsCompiler->compile();
 		if($bundle->debug) {
 			$file = $tsCompiler->getOutputFilename();

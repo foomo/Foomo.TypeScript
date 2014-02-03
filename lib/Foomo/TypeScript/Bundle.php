@@ -52,6 +52,10 @@ class Bundle extends AbstractBundle
 	 * @var mixed
 	 */
 	public $preProcessingData = array();
+	/**
+	 * @var array
+	 */
+	public $outputFilters = array();
 
 
 	/**
@@ -88,6 +92,17 @@ class Bundle extends AbstractBundle
 	public function preProcessWithData($data)
 	{
 		$this->preProcessingData = $data;
+		return $this;
+	}
+
+	/**
+	 * @param callable $filter
+	 *
+	 * @return $this
+	 */
+	public function addOutputFilter($filter)
+	{
+		$this->outputFilters[] = $filter;
 		return $this;
 	}
 
