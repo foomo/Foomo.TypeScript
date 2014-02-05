@@ -348,7 +348,7 @@ class TypeScript
 		$inCommon = 0;
 		$samePath = true;
 		for($i = 0; $i < count($fromParts); $i++) {
-			if(count($toParts) < $i || $fromParts[$i] != $toParts[$i]) {
+			if(count($toParts) - 1 < $i || $fromParts[$i] != $toParts[$i]) {
 				$samePath = false;
 			}
 			if($samePath) {
