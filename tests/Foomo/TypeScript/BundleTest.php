@@ -20,7 +20,6 @@
 namespace Foomo\TypeScript;
 
 use Foomo\Bundle\Compiler\Result;
-use Foomo\Utils;
 
 /**
  * @link www.foomo.org
