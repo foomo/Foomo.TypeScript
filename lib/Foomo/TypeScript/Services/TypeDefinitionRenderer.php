@@ -96,7 +96,7 @@ class TypeDefinitionRenderer extends AbstractRenderer
 		$suffix = $type->isArrayOf?'[]':'';
 		switch($type->type) {
 			case 'mixed':
-				return 'object' . $suffix;
+				return 'any' . $suffix;
 			case 'array':
 				return 'any[]' . $suffix;
 			case 'int':
