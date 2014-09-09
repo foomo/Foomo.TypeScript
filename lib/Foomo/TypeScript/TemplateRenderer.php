@@ -53,6 +53,8 @@ class TemplateRenderer
 	public function renderTemplates(array $templates)
 	{
 		$template = new Template('template', $this->templateFile);
+		$oldDebug = Template::$debug;
+		Template::$debug = false;
 		$templateString = $template->render(
 			$this->templateModel, null, null,
 			array(
@@ -65,5 +67,6 @@ class TemplateRenderer
 				$templateString
 			);
 		}
+		Template::$debug = $oldDebug;
 	}
 }

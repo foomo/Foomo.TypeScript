@@ -564,6 +564,8 @@ class TypeScript
 		$dir = dirname($file);
 		self::makeSureBuildPathExists($dir);
 		if(!file_exists($file) || filemtime($file) < filemtime($template) ) {
+			$oldDebug = Template::$debug;
+			Template::$debug = false;
 			$view = View::fromFile($template);
 			if(file_exists($file)) {
 				$oldContents = file_get_contents($file);
@@ -574,6 +576,7 @@ class TypeScript
 			if($oldContents != $newContents) {
 				file_put_contents($file, $newContents);
 			}
+			Template::$debug = $oldDebug;
 		}
 		return self::create($file);
 	}
