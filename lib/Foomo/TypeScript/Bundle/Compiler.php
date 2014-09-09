@@ -38,6 +38,8 @@ class Compiler
 	 */
 	public static function preProcess(Bundle $bundle)
 	{
+		$oldDebug = Template::$debug;
+		Template::$debug = false;
 		// preprocess things
 		$bundleFile = $bundle->getBundleFile();
 		$bundleFilename = substr($bundleFile, 0 , -4);
@@ -56,6 +58,7 @@ class Compiler
 				$newContents
 			);
 		}
+		Template::$debug = $oldDebug;
 		return $bundleFilename;
 	}
 
