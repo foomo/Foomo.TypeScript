@@ -234,14 +234,19 @@ class TypeScript
 		} else {
 			clearstatcache();
 		}
-		$mTime = 0;
-		if(file_exists($out)) {
-			$mTime = filemtime($out);
+		if($this->generateDeclaration && !file_exists($this->getDeclarationFilename())) {
+			return true;
+		} else {
+			$mTime = 0;
+			if(file_exists($out)) {
+				$mTime = filemtime($out);
+			}
+			return
+				$mTime < self::getLastChange($this->file) ||
+				$mTime < self::getLastTemplateChange($this->templateJobs)
+			;
 		}
-		return
-			$mTime < self::getLastChange($this->file) ||
-			$mTime < self::getLastTemplateChange($this->templateJobs)
-		;
+
 	}
 	/**
 	 * @return $this
@@ -250,6 +255,7 @@ class TypeScript
 	{
 		// fuckoff();
 		$out = $this->getOutputFilename();
+		//\Foomo\MVC::abort();var_dump($this->name . ' g: ' . $this->generateDeclaration . ' w: ' . $this->watch . ' r: ' . ($this->needsRecompilation($out)?'yes':'no') . ' ' . $this->getDeclarationFilename());
 		if($this->watch || !file_exists($out)) {
 			$lockName = 'tsLock-' . basename($out);
 			if(
