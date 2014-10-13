@@ -46,7 +46,8 @@ class ErrorRenderer
 			'<ul>'
 		);
 		$plainErrors = array();
-		foreach(explode(PHP_EOL, $call->stdErr) as $plainError) {
+		$err = empty($call->stdErr) && !empty($call->stdOut) ? $call->stdOut : $call->stdErr;
+		foreach(explode(PHP_EOL, $err) as $plainError) {
 			if(substr($plainError, 0, 1) == chr(9)) {
 				$plainErrors[count($plainErrors)-1] .= PHP_EOL . $plainError;
 			} else {
