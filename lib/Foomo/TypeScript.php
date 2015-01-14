@@ -65,6 +65,12 @@ class TypeScript
 	 */
 	protected $generateDeclaration = false;
 	/**
+	 * if you need to explicitly declare a name for your declaration file
+	 *
+	 * @var null|string
+	 */
+	protected $declarationName = null;
+	/**
 	 * @var bool
 	 */
 	protected $displayCompilerErrors = false;
@@ -141,6 +147,16 @@ class TypeScript
 	}
 
 	/**
+	 * @param string $fileName
+	 * @return $this
+	 */
+	public function writeDeclarationTo($fileName)
+	{
+		$this->declarationName = $fileName;
+		return $this;
+	}
+
+	/**
 	 * generate a declaration file next compiled file
 	 *
 	 * @param bool $generateDeclaration
@@ -185,7 +201,11 @@ class TypeScript
 	public function getDeclarationFilename()
 	{
 		if($this->generateDeclaration) {
-			return substr($this->file, 0, -2) . 'd.ts';
+			if(!is_null($this->declarationName)) {
+				return $this->declarationName;
+			} else {
+				return substr($this->file, 0, -2) . 'd.ts';
+			}
 		} else {
 			return false;
 		}

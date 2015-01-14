@@ -42,7 +42,8 @@ class Compiler
 		Template::$debug = false;
 		// preprocess things
 		$bundleFile = $bundle->getBundleFile();
-		$bundleFilename = substr($bundleFile, 0 , -4);
+		//$bundleFilename = substr($bundleFile, 0 , -7);
+		$bundleFilename = dirname($bundleFile) . DIRECTORY_SEPARATOR . '.bundle-' . sha1(serialize($bundle->preProcessingData)) . '.ts';
 		$rendered = '';
 		if(file_exists($bundleFile)) {
 			$template = View::fromFile($bundleFile);
@@ -70,8 +71,10 @@ class Compiler
 			->name($bundle->name)
 			->displayCompilerErrors($bundle->debug)
 			->generateDeclaration($bundle->writeTypeDefinition)
+			->writeDeclarationTo(substr($bundle->getBundleFile(), 0 , -6) . 'd.ts' )
 			->target($bundle->target)
 		;
+
 		foreach($bundle->templateJobs as $templateJob) {
 			$tsCompiler->lookForTemplates($templateJob['dir'], $templateJob['renderer']);
 		}
