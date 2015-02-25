@@ -257,16 +257,16 @@ class TypeScript
 		if($this->generateDeclaration && !file_exists($this->getDeclarationFilename())) {
 			return true;
 		} else {
-			$mTime = 0;
 			if(file_exists($out)) {
 				$mTime = filemtime($out);
-			}
-			return
-				$mTime < self::getLastChange($this->file) ||
-				$mTime < self::getLastTemplateChange($this->templateJobs)
-			;
+                return
+                    $mTime < self::getLastChange($this->file) ||
+                    $mTime < self::getLastTemplateChange($this->templateJobs)
+                ;
+			} else {
+                return true;
+            }
 		}
-
 	}
 	/**
 	 * @return $this
@@ -521,6 +521,7 @@ class TypeScript
 		return $deps;
 	}
 
+
 	/**
 	 * extract dependencies / references in a typescript file
 	 *
@@ -530,15 +531,23 @@ class TypeScript
 	 */
 	public static function extractDependenciesFromFile($filename)
 	{
-		$deps = array();
-		$lines = explode(PHP_EOL, file_get_contents($filename));
-		$dir = dirname($filename);
-		foreach($lines as $line) {
-			if($dep = self::extractReferenceFromLineStringInDir($line, $dir)) {
-				$deps[] = $dep;
-			}
-		}
-		return $deps;
+        static $cache = [];
+        if(!isset($cache[$filename])) {
+            $deps = [];
+            $matches = [];
+            $count = preg_match_all('|///\s*<reference\s+path=([\'"])(.*?)\1|', $ts = file_get_contents($filename), $matches);
+            if($count > 0) {
+                $dir = dirname($filename);
+                foreach($matches[2] as $dep) {
+                    $filename = realpath($dir . DIRECTORY_SEPARATOR . $dep);
+                    if(file_exists($filename)) {
+                        $deps[] = $filename;
+                    }
+                }
+            }
+            $cache[$filename] = $deps;
+        }
+        return $cache[$filename];
 	}
 
 	private static function extractReferenceFromLineStringInDir($line, $dir)

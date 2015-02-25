@@ -43,7 +43,7 @@ class Compiler
 		// preprocess things
 		$bundleFile = $bundle->getBundleFile();
 		//$bundleFilename = substr($bundleFile, 0 , -7);
-		$bundleFilename = dirname($bundleFile) . DIRECTORY_SEPARATOR . '.bundle-' . sha1(serialize($bundle->preProcessingData)) . '.ts';
+		$bundleFilename = self::getBundleFilename($bundle);
 		$rendered = '';
 		if(file_exists($bundleFile)) {
 			$template = View::fromFile($bundleFile);
@@ -64,6 +64,11 @@ class Compiler
 		Template::$debug = $oldDebug;
 		return $bundleFilename;
 	}
+
+    public static function getBundleFilename(Bundle $bundle)
+    {
+        return dirname($bundle->getBundleFile()) . DIRECTORY_SEPARATOR . '.bundle-' . sha1(serialize($bundle->preProcessingData)) . '.ts';
+    }
 
 	public static function compile(Bundle $bundle, Result $result)
 	{

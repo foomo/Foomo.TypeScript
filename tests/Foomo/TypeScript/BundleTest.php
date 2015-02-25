@@ -37,7 +37,8 @@ class BundleTest extends \PHPUnit_Framework_TestCase
 	}
 	private function cleanUp()
 	{
-		$bundleFile = self::getBundlePath('bar') . DIRECTORY_SEPARATOR . 'bundle.ts';
+        $bundle = self::getBarBundle();
+		$bundleFile =  Bundle\Compiler::getBundleFilename($bundle);
 		if(file_exists($bundleFile)) {
 			unlink($bundleFile);
 		}
@@ -57,9 +58,10 @@ class BundleTest extends \PHPUnit_Framework_TestCase
 	{
 		$bundle = self::getBarBundle();
 		Bundle\Compiler::compile($bundle, $result = new Result());
+
 		$this->assertContains(
-			'/// <reference path=\'test' . DIRECTORY_SEPARATOR . 'nestedBar.ts\' />',
-			file_get_contents(self::getBundlePath('bar') . DIRECTORY_SEPARATOR . 'bundle.ts')
+			'/// <reference path="test/nestedBar.ts" />',
+			file_get_contents(Bundle\Compiler::getBundleFilename($bundle))
 		);
 	}
 }
