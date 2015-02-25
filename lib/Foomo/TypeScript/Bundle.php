@@ -57,6 +57,15 @@ class Bundle extends AbstractBundle
 	 */
 	public $outputFilters = array();
 
+    public function getHash()
+    {
+        return parent::getHash() . sha1(serialize($this));
+    }
+
+    public function __sleep()
+    {
+        return ['locale', 'preProcessingData', 'path', 'name', 'debug'];
+    }
 
 	/**
 	 * @param bool $yesOrNo
