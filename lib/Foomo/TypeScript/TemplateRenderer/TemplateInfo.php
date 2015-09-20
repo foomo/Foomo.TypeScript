@@ -26,6 +26,10 @@ namespace Foomo\TypeScript\TemplateRenderer;
 class TemplateInfo
 {
 	/**
+	 * @var string
+	 */
+	public $suffix;
+	/**
 	 * name without the suffix
 	 *
 	 * @var string
