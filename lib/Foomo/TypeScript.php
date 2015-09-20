@@ -461,19 +461,30 @@ class TypeScript
 					$path,
 					$templateInfos
 				);
-			} else if(substr($name, -5) == '.html') {
-				$info = new TypeScript\TemplateRenderer\TemplateInfo();
-				$info->name = substr($name, 0, -5);
-				$info->path = $path;
-				$info->relativeFilename = implode(
-					DIRECTORY_SEPARATOR,
-					array_merge(
-						$path, array($name))
-					)
-					. '.html'
-				;
-				$info->filename = $fileInfo->getPathname();
-				$templateInfos[$info->name] = $info;
+			} else {
+				$suffix = '';
+				$reverseName = strrev($name);
+				$dotPos = strpos($reverseName, '.');
+				if($dotPos !== false && $dotPos > 0) {
+					$suffix = substr($name, -$dotPos);
+				}
+				switch($suffix) {
+					case "html":
+					case "tpl":
+						$info = new TypeScript\TemplateRenderer\TemplateInfo();
+						$info->name = substr($name, 0, - $dotPos - 1);
+						$info->suffix = $suffix;
+						$info->path = $path;
+						$info->relativeFilename = implode(
+								DIRECTORY_SEPARATOR,
+								array_merge(
+									$path, array($name))
+							)
+							. '.html'
+						;
+						$info->filename = $fileInfo->getPathname();
+						$templateInfos[$info->name] = $info;
+				}
 			}
 		}
 		ksort($templateInfos);
