@@ -455,7 +455,7 @@ class TypeScript
 				continue;
 			}
 			if($fileInfo->isDir()) {
-				$path .= DIRECTORY_SEPARATOR . $name;
+				$path[] = DIRECTORY_SEPARATOR . $name;
 				self::scanForTemplatesInDir(
 					$fileInfo->getPathname(),
 					$path,
