@@ -308,8 +308,7 @@ class TypeScript
 				$arguments[] = '--out';
 				$arguments[] = $out;
 				$arguments[] = $this->file;
-				$call = CliCall::create('tsc', $arguments);
-				// trigger_error($call->renderCommand() . ' ' . var_export($arguments, true));
+				$call = CliCall::create(\Foomo\NPM::which(\Foomo\TypeScript\Module::NAME, 'tsc'), $arguments);
 				$call->execute();
 				if($call->exitStatus !== 0) {
 					trigger_error('WTF' . $call->report, E_USER_WARNING);

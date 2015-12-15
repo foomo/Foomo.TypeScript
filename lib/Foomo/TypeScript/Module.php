@@ -70,7 +70,7 @@ class Module extends \Foomo\Modules\ModuleBase
 			\Foomo\Modules\Resource\Module::getResource('Foomo.JS', '1.2.*'),
 			\Foomo\Modules\Resource\ComposerPackage::getResource('geshi/geshi', 'dev-master'),
 			\Foomo\Modules\Resource\Config::getResource(self::NAME, 'Foomo.typeScript'),
-			\Foomo\Modules\Resource\CliCommand::getResource('tsc')
+			\Foomo\Modules\Resource\NPMPackage::getResource('typescript', '1.7.5', 'microsofts typescript compiler')
 		);
 	}
 
