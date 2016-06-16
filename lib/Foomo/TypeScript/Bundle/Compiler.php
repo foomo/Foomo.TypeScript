@@ -76,6 +76,7 @@ class Compiler
 		TypeScript::renderTemplates($bundle->templateJobs);
 		$tsCompiler = TypeScript::create($bundleFilename)
 			->name($bundle->name)
+			->jsx($bundle->jsx)
 			->displayCompilerErrors($bundle->debug)
 			->generateDeclaration($bundle->writeTypeDefinition)
 			->writeDeclarationTo(substr($bundle->getBundleFile(), 0 , -6) . 'd.ts' )
