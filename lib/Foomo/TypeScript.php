@@ -80,6 +80,14 @@ class TypeScript
 	 * @var string
 	 */
 	protected $target = 'ES3';
+
+	const JSX_KIND_REACT    = "react";
+	const JSX_KIND_PRESERVE = "preserve";
+	/**
+	 * jsx kind
+	 * @var null
+	 */
+	protected $jsx = null;
 	protected $outputFilters = array();
 	/**
 	 * where to look for templates on what to use there
@@ -131,6 +139,25 @@ class TypeScript
 	public function out($filename)
 	{
 		$this->out = $filename;
+		return $this;
+	}
+
+	/**
+	 * @param string $kind self::JSX_KIND_
+	 * @return $this
+	 */
+	function jsx($kind)
+	{
+		switch($kind) {
+			case null:
+				// you might reset it as well
+			case self::JSX_KIND_REACT:
+			case self::JSX_KIND_PRESERVE:
+				$this->jsx = $kind;
+				break;
+			default:
+				trigger_error("illegal jsx kind: " . $kind, E_USER_ERROR);
+		}
 		return $this;
 	}
 	/**
@@ -295,6 +322,11 @@ class TypeScript
 
 				$arguments = array('--target', $this->target);
 
+				if($this->jsx) {
+					$arguments[] = "--jsx";
+					$arguments[] = $this->jsx;
+				}
+				
 				if($this->comments) {
 					// $arguments[] = '--comments';
 				}

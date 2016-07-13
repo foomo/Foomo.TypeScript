@@ -40,6 +40,12 @@ class Bundle extends AbstractBundle
 	 */
 	public $path;
 	/**
+	 * jsx type
+	 *
+	 * @var string|null
+	 */
+	public $jsx = null;
+	/**
 	 * @var string
 	 */
 	public $target = TypeScript::TARGET_ES3;
@@ -66,7 +72,11 @@ class Bundle extends AbstractBundle
     {
         return ['locale', 'preProcessingData', 'path', 'name', 'debug'];
     }
-
+	public function jsx($kind = TypeScript::JSX_KIND_REACT)
+	{
+		$this->jsx = $kind;
+		return $this;
+	}
 	/**
 	 * @param bool $yesOrNo
 	 *
