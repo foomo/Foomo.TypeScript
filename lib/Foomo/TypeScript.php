@@ -283,7 +283,7 @@ class TypeScript
 				$this->needsRecompilation($out) &&
 
 				// ok i need to compile - let´s lock this
-				Lock::lock($lockName, true) &&
+				$l = Lock::lock($lockName, true) &&
 
 				// did anybody else do my job?
 				$this->needsRecompilation($out)
@@ -361,6 +361,8 @@ class TypeScript
 						}
 					}
 				}
+			}
+			if (isset($l) && $l) {
 				Lock::release($lockName);
 			}
 		}
