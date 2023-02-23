@@ -26,7 +26,7 @@ use Foomo\Modules\MakeResult;
  */
 class Module extends \Foomo\Modules\ModuleBase
 {
-	const VERSION = '1.8.11';
+	const VERSION = '3.7.2';
 	//---------------------------------------------------------------------------------------------
 	// ~ Constants
 	//---------------------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ class Module extends \Foomo\Modules\ModuleBase
 			//\Foomo\Modules\Resource\ComposerPackage::getResource('geshi/geshi', 'dev-master'),
 			\Foomo\Modules\Resource\Config::getResource(self::NAME, 'Foomo.typeScript'),
 			\Foomo\Modules\Resource\CliCommand::getResource('tsc'),
-			//\Foomo\Modules\Resource\NPMPackage::getResource('typescript', '1.8.10', 'microsofts typescript compiler')
+			// \Foomo\Modules\Resource\NPMPackage::getResource('typescript', '3.7.2', 'microsofts typescript compiler')
 		);
 	}
 
